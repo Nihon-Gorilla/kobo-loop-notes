@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="偏光まで記録した全天球の環境マップのデータセット論文（SIGGRAPH Asia 2026）を、前提知識なしで説明します。偏光フィルターを回して試せる模型つき。">
+<meta property="og:title" content="偏光の環境マップのしくみ">
+<meta property="og:description" content="偏光まで記録した全天球の環境マップのデータセット論文を、前提知識なしで説明します。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>偏光の環境マップのしくみ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。偏光の向きは色相環（0°=赤 → 90°=シアン → 180°=赤）で全編通す */
+:root{
+  --paper:#f2f4f7; --sheet:#ffffff; --ink:#171d2a; --soft:#4a5468; --faint:#8791a3; --rule:#d4d9e2;
+  --accent:#0f6e8c; --accent-bg:#e2f1f6; --sun:#b86a00; --bad:#b3261e; --good:#1c7a3d;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0e121a; --sheet:#151b26; --ink:#e7ecf4; --soft:#aab3c4; --faint:#6c7689; --rule:#283143;
+  --accent:#5cc8e8; --accent-bg:#102a33; --sun:#ffbe55; --bad:#ff8a80; --good:#7ddc9a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0e121a; --sheet:#151b26; --ink:#e7ecf4; --soft:#aab3c4; --faint:#6c7689; --rule:#283143;
+  --accent:#5cc8e8; --accent-bg:#102a33; --sun:#ffbe55; --bad:#ff8a80; --good:#7ddc9a; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--accent)}
+header p{color:var(--soft);margin:10px 0 0}
+.hue{height:6px;border-radius:3px;margin-top:14px;background:linear-gradient(90deg,hsl(0 75% 55%),hsl(60 75% 50%),hsl(120 60% 45%),hsl(180 70% 45%),hsl(240 70% 60%),hsl(300 70% 55%),hsl(360 75% 55%))}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--accent)}
+code,.num{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--accent);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--accent);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+figure{margin:6px 0;display:flex;flex-direction:column;gap:8px}
+figure .draw{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:12px;overflow-x:auto}
+figure svg{display:block;max-width:100%;height:auto;min-width:520px;color:var(--ink)}
+figcaption{font-size:13.5px;color:var(--soft);line-height:1.65}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--accent-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--accent)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:14px}
+.lab label{min-width:9em}
+.lab input[type=range]{accent-color:var(--accent);width:min(240px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums;min-width:4.5em;display:inline-block}
+.lab canvas{display:block;width:100%;height:auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout span b{font-family:var(--f-data);font-weight:600}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:12em minmax(0,1fr) 7.5em;gap:10px;align-items:center;font-size:13.5px}
+@media (max-width:560px){.bar{grid-template-columns:minmax(0,1fr) 7.5em}.bar>span:first-child{grid-column:1/-1}}
+.bar .t{height:14px;background:var(--sheet);border:1px solid var(--rule);border-radius:2px;position:relative}
+.bar .t i{position:absolute;inset:0 auto 0 0;border-radius:1px}
+.bar .v{font-family:var(--f-data);text-align:right;font-variant-numeric:tabular-nums}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が発表されたか</a></li>
+    <li><a href="#s2">環境マップとは</a></li>
+    <li><a href="#s3">光には向きがある</a></li>
+    <li><a href="#s4">偏光を 4 つの数字で書く</a></li>
+    <li><a href="#s5">空も偏光している</a></li>
+    <li><a href="#s6">どうやって撮ったか</a></li>
+    <li><a href="#s7">球の上で向きを揃える難しさ</a></li>
+    <li><a href="#s8">何に使えて、何が残るか</a></li>
+    <li><a href="#s9">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>偏光の<em>環境マップ</em>のしくみ</h1>
+  <p>CG で「周りの光」を表すのに使う全天球写真に、人の目には見えない光の「向き」まで記録したデータセットが公開されました。その論文を、前提知識なしで順番に説明します。数字は論文に書かれた値だけを使っています。</p>
+  <div class="hue" aria-hidden="true"></div>
+  <div class="meta">2026-11-19 版 ・ 読む時間の目安 15 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が発表されたか</h2>
+  <p>論文は <strong>Real-world Polarimetric Environment Map Dataset</strong>（Yonghee Oh、Ryota Maeda、Yunseong Moon、Seung-Hwan Baek）。韓国 POSTECH の研究グループによるもので、CG の国際会議 SIGGRAPH Asia 2026 で発表されます。</p>
+  <ul>
+    <li>屋内 33、屋外 67、合わせて <strong>100 シーン</strong>の全天球写真。各画素に、明るさだけでなく<strong>偏光</strong>の情報が入っています。</li>
+    <li>同じ屋外の地点で、朝から夜まで 1 日に 10 枚撮った時系列もあります。</li>
+    <li>データ（Hugging Face）とコード（GitHub）は公開済みです。</li>
+  </ul>
+  <div class="key"><b>KEY</b>一言でいうと「CG の照明に使う全天球写真を、光の向きまで含めて実際の場所で 100 か所測ったデータ集」です。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>環境マップとは</h2>
+  <p>CG で金属の球や車を自然に見せるには、その物を取り囲むあらゆる方向から来る光を知る必要があります。そこで、ある場所に立って<strong>全方向を撮った写真</strong>を 1 枚用意し、それを「周りの光」として使います。これが<strong>環境マップ</strong>です。映画やゲームで広く使われています。</p>
+  <p>ふつうの写真と違うのは、明るさの幅をそのまま残すことです。太陽は日陰の壁より何万倍も明るいので、露出を変えて何枚も撮り、合成して 1 枚にします。これを <strong>HDR</strong>（高ダイナミックレンジ）と呼びます。</p>
+  <p>ところが、これまでの環境マップは各画素に「赤・緑・青の明るさ」しか持っていませんでした。光の持つもう 1 つの性質、偏光が抜け落ちていたのです。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>光には向きがある</h2>
+  <p>光は波で、進む向きと直角な面の中で揺れています。揺れる向きがばらばらな光を<strong>無偏光</strong>、揺れる向きに偏りがある光を<strong>偏光</strong>と呼びます。人の目には区別がつきませんが、偏光フィルター（偏光サングラスのレンズ）を通すと分かります。フィルターは決まった向きの揺れだけを通すので、回すと明るさが変わるのです。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 偏光フィルターを回す</b>
+    <canvas id="pf" width="760" height="230" aria-label="入ってくる光と、フィルターを通った後の明るさ"></canvas>
+    <div class="row"><label for="pf-th">フィルターの向き</label><input type="range" id="pf-th" min="0" max="180" step="1" value="0"><output id="pf-th-o"></output></div>
+    <div class="row"><label for="pf-dop">光の偏光度</label><input type="range" id="pf-dop" min="0" max="100" step="1" value="60"><output id="pf-dop-o"></output></div>
+    <div class="row"><label for="pf-aop">光の偏光の向き</label><input type="range" id="pf-aop" min="0" max="179" step="1" value="30"><output id="pf-aop-o"></output></div>
+    <div class="readout"><span>通った明るさ <b id="pf-out"></b></span><span>（入る光を 100 とする）</span></div>
+    <p class="note">偏光度を 0 にすると、どの向きでも 50 のまま変わりません。100 にすると、光の向きにフィルターを合わせた時に 100、直角にすると 0 になります。水面や窓の照り返しは偏光度が高いので、偏光サングラスで消せます。</p>
+  </div>
+  <p>大事なのは、偏光が<strong>物の形と材質</strong>を反映することです。光が物の表面で反射すると、表面の傾きと材質に応じた向き・強さの偏光になります。逆に、偏光を測れば表面の向きを推定できます。この技術を <strong>shape-from-polarization</strong>（偏光からの形状推定）と呼びます。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>偏光を 4 つの数字で書く</h2>
+  <p>光の偏光の状態は、<strong>ストークスベクトル</strong>と呼ばれる 4 つの数字で書けます。</p>
+  <div class="tbl"><table>
+    <tr><th>記号</th><th>意味</th></tr>
+    <tr><td><code>s0</code></td><td>全体の明るさ。ふつうの写真が持っているのはこれだけ</td></tr>
+    <tr><td><code>s1</code></td><td>横向き（0°）と縦向き（90°）の揺れの差</td></tr>
+    <tr><td><code>s2</code></td><td>斜め（45°）と逆斜め（135°）の揺れの差</td></tr>
+    <tr><td><code>s3</code></td><td>右回りと左回りの揺れ（円偏光）の差</td></tr>
+  </table></div>
+  <p>ここから、3 章の触って確かめる箱で動かした 2 つの量が計算できます。論文の式は次のとおりです。</p>
+  <p class="eq">線偏光度 ρ = √(s1² + s2²) ÷ s0　（0 なら無偏光、1 なら完全な偏光）</p>
+  <p class="eq">偏光の向き ψ = ½ × atan2(s2, s1)　（0°〜180° の範囲）</p>
+  <p>今回のデータは、各画素について赤・緑・青それぞれに <code>s0</code>〜<code>s3</code> を持っています。つまり 1 画素あたり 12 個の数字です。論文によると、ほとんどのシーンで円偏光の <code>s3</code> は無視できるほど小さかったそうです。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>空も偏光している</h2>
+  <p>晴れた青空の光は偏光しています。太陽の光が空気の分子に当たって散らばる時（レイリー散乱）、散らばった向きによって偏光の強さが変わるからです。理想化した式では、太陽から角度 γ 離れた空の偏光度は次のようになります。</p>
+  <p class="eq">偏光度 = sin²γ ÷ (1 + cos²γ)</p>
+  <div class="lab">
+    <b>触って確かめる ・ 太陽からの角度と空の偏光度（理想化した式）</b>
+    <canvas id="sky" width="760" height="260" aria-label="太陽からの角度と偏光度の関係"></canvas>
+    <div class="row"><label for="sky-g">太陽からの角度</label><input type="range" id="sky-g" min="0" max="180" step="1" value="90"><output id="sky-g-o"></output></div>
+    <div class="readout"><span>偏光度 <b id="sky-out"></b></span></div>
+    <p class="note">太陽から 90° の方向で最大になり、太陽の方向と真後ろでは 0 になります。これは教科書の理想化した式で、実際の空は空気中の粒や何度も散らばる光のせいで、もっと低くなります。この論文のデータは、その「実際の空」を測ったものです。</p>
+  </div>
+  <p>論文は、撮った空の偏光を時刻と天気で比べています。</p>
+  <ul>
+    <li><strong>晴れ</strong>：偏光の向きは、太陽が東から西へ動くのに合わせて滑らかに回りました。レイリー散乱のモデルとおおむね一致します。</li>
+    <li><strong>曇り</strong>：雲の濃い所で偏光度が下がりました。雲の中で光が何度も散らばり、向きがばらばらになるためです。</li>
+    <li><strong>夜</strong>：直射日光がないので、空全体で偏光度が低くなりました。</li>
+  </ul>
+  <p>つまり、同じ場所でも時刻と天気で「周りの光の偏光」は大きく変わります。偏光を使って形を推定する手法は、この違いの影響を受けるはずで、それを実データで試せるようになったのが今回の意義です。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>どうやって撮ったか</h2>
+  <figure>
+    <div class="draw">
+    <svg viewBox="0 0 720 220" role="img" aria-label="偏光カメラを回転台で 18 方向に向けて撮り、HDR に合成し、全天球につなぐ流れ">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+      <g font-family="sans-serif" font-size="12.5" fill="currentColor">
+        <rect x="14" y="50" width="150" height="80" fill="var(--sheet)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="89" y="76" text-anchor="middle">ストークスカメラ</text>
+        <text x="89" y="94" text-anchor="middle" font-size="10.5" opacity=".75">偏光センサー＋位相板</text>
+        <text x="89" y="110" text-anchor="middle" font-size="10.5" opacity=".75">1 回で s0〜s3 を測る</text>
+        <line x1="164" y1="90" x2="198" y2="90" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+        <rect x="204" y="50" width="150" height="80" fill="var(--sheet)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="279" y="76" text-anchor="middle">電動の回転台</text>
+        <text x="279" y="94" text-anchor="middle" font-size="10.5" opacity=".75">横 6 × 縦 3</text>
+        <text x="279" y="110" text-anchor="middle" font-size="10.5" opacity=".75">＝ 18 方向</text>
+        <line x1="354" y1="90" x2="388" y2="90" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+        <rect x="394" y="50" width="130" height="80" fill="var(--sheet)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="459" y="80" text-anchor="middle">露出を変えて</text>
+        <text x="459" y="98" text-anchor="middle">HDR に合成</text>
+        <line x1="524" y1="90" x2="558" y2="90" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+        <rect x="564" y="50" width="142" height="80" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="635" y="76" text-anchor="middle" fill="var(--accent)">全天球につなぐ</text>
+        <text x="635" y="94" text-anchor="middle" font-size="10.5" fill="var(--accent)">2048 × 1024</text>
+        <text x="635" y="110" text-anchor="middle" font-size="10.5" fill="var(--accent)">偏光の向きを揃えて</text>
+        <text x="360" y="175" text-anchor="middle" font-size="11" opacity=".8">レンズは視野約 100° の広角。カメラはレンズの光学中心を軸に回るよう位置を調整してある</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>撮影の流れ。偏光フィルターを回して何枚も撮る方式ではなく、画素ごとに向きの違う微小な偏光子と位相板を載せたセンサーで、1 回の撮影で 4 つの数字すべてを測ります。</figcaption>
+  </figure>
+  <p>カメラは Sony の RGB 偏光センサー IMX250MYR に、研究チームが作った微小な位相板（リターダー）を重ねたものです。位相板があることで、ふつうの偏光センサーでは測れない円偏光 <code>s3</code> まで 1 回で測れます。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>球の上で向きを揃える難しさ</h2>
+  <p>18 枚をつなぐ時、明るさならそのまま重ねれば済みます。偏光の向きはそうはいきません。<code>s1</code> と <code>s2</code> は「どちらを 0° とするか」という基準の向きに対して測った値なので、写真ごとに基準がずれていると、つなぎ目で向きが食い違います。</p>
+  <p>では全天球の全部の点で、基準の向きを滑らかに決めればよいかというと、それは<strong>数学的に不可能</strong>です。球の表面に向きを滑らかに並べると、必ずどこかに向きが決まらない点（特異点）が残ります。地図の経線が北極と南極で 1 点に集まり、そこで「北」が決められなくなるのと同じです。特異点の近くでは、実際の光の偏光は滑らかなのに、数字だけが急に跳ねたり符号が反転したりします。</p>
+  <p>論文は 2 つの工夫でこれを避けています。</p>
+  <ul>
+    <li>カメラの 1 枚ごとに、画素の向きに合わせて基準を最小の回転で決め直す。広角レンズの端で向きがずれるのを減らします。</li>
+    <li>つなぎ合わせる時は、基準の向きに依存しない別の表し方（10 個の成分で書く方式）に変換してから混ぜる。これで特異点の跳ねが出ません。</li>
+  </ul>
+  <p>写真が重なる部分で、偏光の向きがどれだけ食い違ったかの比較です（小さいほど良い）。</p>
+  <div class="bars">
+    <div class="bar"><span>補正なし</span><span class="t"><i style="width:94%;background:var(--faint)"></i></span><span class="v">33.7° / 31.8°</span></div>
+    <div class="bar"><span>既存のレンダラーの方式</span><span class="t"><i style="width:42%;background:var(--faint)"></i></span><span class="v">15.0° / 8.2°</span></div>
+    <div class="bar"><span>この論文の方式</span><span class="t"><i style="width:35%;background:var(--accent)"></i></span><span class="v">12.4° / 3.3°</span></div>
+  </div>
+  <p class="note" style="font-size:13.5px;color:var(--soft)">数字は平均 / 中央値。棒の長さは平均の値。中央値で見ると、既存の方式の 8.2° から 3.3° に縮んでいます。</p>
+</section>
+
+<section id="s8">
+  <h2><span class="n">8</span>何に使えて、何が残るか</h2>
+  <h3>使い道</h3>
+  <ul>
+    <li><strong>偏光まで正しい CG</strong>：研究チームは、よく使われるレンダラー Mitsuba 3 の環境光に偏光を入れる追加機能を作りました。晴れた日に金属球を撮った実物と、データから描いた画像を見比べると、偏光の様子がよく一致したと報告しています。偏光を抜いた環境マップでは、実物の偏光（特に円偏光）は再現されませんでした。</li>
+    <li><strong>形状推定の試験台</strong>：偏光から形を推定する既存の AI に、偏光あり・なしの照明で同じ場面を見せると、推定された表面の向きが変わり、金属で特に大きく変わりました。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>形状推定への影響は、図で見せた比較だけで、誤差の数字は論文に出ていません。論文自身も「この比較から一般的な結論は言えない」と書いています。金属球の一致も、数字ではなく見た目での比較です。</div>
+  <h3>残る課題</h3>
+  <ul>
+    <li>カメラは可視光用ですが、近赤外線にも少し反応します。屋外では太陽の近赤外線が赤の画素に混ざり、赤の色と偏光の値に影響します。</li>
+    <li>広角レンズの端の歪みや暗さは補正していますが、残った誤差の大きさは示されていません。</li>
+  </ul>
+</section>
+
+<section id="s9">
+  <h2><span class="n">9</span>用語集</h2>
+  <dl>
+    <dt>環境マップ</dt><dd>ある地点から全方向を撮った写真。CG で「周りの光」として使う。</dd>
+    <dt>HDR</dt><dd>露出を変えた写真を合成して、太陽から暗がりまでの明るさの幅を残したもの。</dd>
+    <dt>偏光</dt><dd>光の揺れの向きに偏りがある状態。人の目には見えない。</dd>
+    <dt>偏光度</dt><dd>光のうち偏光している割合。0〜1。</dd>
+    <dt>偏光の向き</dt><dd>揺れの向きの角度。0°〜180°。</dd>
+    <dt>円偏光</dt><dd>揺れの向きがらせん状に回る偏光。</dd>
+    <dt>ストークスベクトル</dt><dd>偏光の状態を表す 4 つの数字 s0〜s3。</dd>
+    <dt>位相板（リターダー）</dt><dd>光の揺れの成分の間にずれを作る板。円偏光を測るのに使う。</dd>
+    <dt>レイリー散乱</dt><dd>光が空気の分子のような小さな粒に当たって散らばること。空が青く偏光している理由。</dd>
+    <dt>特異点</dt><dd>球の上に向きを滑らかに並べた時、必ず残る「向きが決まらない点」。</dd>
+    <dt>shape-from-polarization</dt><dd>偏光の測定から物の表面の向き（形）を推定する技術。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>論文：<a href="https://arxiv.org/abs/2611.21334" target="_blank" rel="noopener">arXiv:2611.21334</a>（SIGGRAPH Asia 2026 Conference Papers）</li>
+    <li>プロジェクトページ（データとコードへのリンク、ブラウザで見られるビューアあり）：<a href="https://yongheeoh.github.io/PolarimetricEnvironmentMap/" target="_blank" rel="noopener">Real-world Polarimetric Environment Map Dataset</a></li>
+  </ul>
+</section>
+
+<footer>
+  <span>数字の出どころ：論文 arXiv:2611.21334 の本文とプロジェクトページ（2026-11-19 確認）。3 章と 5 章の「触って確かめる」は教科書の理想化した式で、論文のデータではありません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hueOf = deg => `hsl(${(deg % 180) * 2} 75% 52%)`;
+
+// 3 章：偏光フィルター。透過 = (s0 + s1 cos2θ + s2 sin2θ) / 2
+function pfDraw(){
+  const th = +$('pf-th').value, p = +$('pf-dop').value / 100, a = +$('pf-aop').value;
+  $('pf-th-o').textContent = th + '°'; $('pf-dop-o').textContent = Math.round(p*100) + ' %'; $('pf-aop-o').textContent = a + '°';
+  const r = x => x * Math.PI / 180;
+  const out = 50 * (1 + p * Math.cos(2 * (r(th) - r(a))));
+  $('pf-out').textContent = out.toFixed(0);
+  const c = $('pf'), g = c.getContext('2d'), W = c.width, H = c.height;
+  g.clearRect(0, 0, W, H);
+  const ink = css('--ink'), soft = css('--soft'), faint = css('--faint');
+  // 入ってくる光：揺れの向きを線の束で表す
+  const cx1 = 130, cy = 112, R = 78;
+  g.strokeStyle = faint; g.lineWidth = 1; g.beginPath(); g.arc(cx1, cy, R, 0, 7); g.stroke();
+  const N = 24;
+  for (let i = 0; i < N; i++) {
+    const ang = i < Math.round(N * p) ? a : (i * 180 / N);
+    const t = -r(ang);
+    g.strokeStyle = i < Math.round(N * p) ? hueOf(a) : soft; g.globalAlpha = .55; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(cx1 - R * .9 * Math.cos(t), cy - R * .9 * Math.sin(t)); g.lineTo(cx1 + R * .9 * Math.cos(t), cy + R * .9 * Math.sin(t)); g.stroke();
+  }
+  g.globalAlpha = 1; g.fillStyle = soft; g.font = '13px sans-serif'; g.textAlign = 'center';
+  g.fillText('入ってくる光の揺れ', cx1, 222);
+  // フィルター
+  const cx2 = 380;
+  g.strokeStyle = ink; g.lineWidth = 2; g.beginPath(); g.arc(cx2, cy, R, 0, 7); g.stroke();
+  const t2 = -r(th);
+  for (let k = -4; k <= 4; k++) {
+    const ox = -Math.sin(t2) * k * 14, oy = Math.cos(t2) * k * 14, L = Math.sqrt(Math.max(0, R*R - (k*14)**2)) * .95;
+    g.strokeStyle = ink; g.globalAlpha = .35; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(cx2 + ox - L * Math.cos(t2), cy + oy - L * Math.sin(t2)); g.lineTo(cx2 + ox + L * Math.cos(t2), cy + oy + L * Math.sin(t2)); g.stroke();
+  }
+  g.globalAlpha = 1; g.fillStyle = soft; g.fillText('フィルター（この向きだけ通す）', cx2, 222);
+  // 通った光
+  const cx3 = 630;
+  g.fillStyle = css('--sheet'); g.strokeStyle = faint; g.lineWidth = 1; g.beginPath(); g.arc(cx3, cy, R, 0, 7); g.fill(); g.stroke();
+  g.globalAlpha = out / 100; g.fillStyle = css('--sun'); g.beginPath(); g.arc(cx3, cy, R - 2, 0, 7); g.fill(); g.globalAlpha = 1;
+  g.fillStyle = soft; g.fillText('通った明るさ', cx3, 222);
+  g.strokeStyle = faint; g.lineWidth = 1.5;
+  [[cx1 + R + 12, cx2 - R - 12], [cx2 + R + 12, cx3 - R - 12]].forEach(([x0, x1]) => { g.beginPath(); g.moveTo(x0, cy); g.lineTo(x1, cy); g.lineTo(x1 - 8, cy - 5); g.moveTo(x1, cy); g.lineTo(x1 - 8, cy + 5); g.stroke(); });
+}
+['pf-th', 'pf-dop', 'pf-aop'].forEach(id => $(id).addEventListener('input', pfDraw));
+pfDraw();
+
+// 5 章：レイリー散乱の偏光度
+const rayleigh = gdeg => { const g = gdeg * Math.PI / 180, s = Math.sin(g), c = Math.cos(g); return s * s / (1 + c * c); };
+function skyDraw(){
+  const gd = +$('sky-g').value, v = rayleigh(gd);
+  $('sky-g-o').textContent = gd + '°'; $('sky-out').textContent = Math.round(v * 100) + ' %';
+  const c = $('sky'), g = c.getContext('2d'), W = c.width, H = c.height, L = 54, Rr = W - 24, T = 20, B = H - 40;
+  const x = d => L + d / 180 * (Rr - L), y = p => B - p * (B - T);
+  g.clearRect(0, 0, W, H);
+  g.strokeStyle = css('--rule'); g.lineWidth = 1;
+  [0, .5, 1].forEach(p => { g.beginPath(); g.moveTo(L, y(p)); g.lineTo(Rr, y(p)); g.stroke(); });
+  g.fillStyle = css('--faint'); g.font = '12px sans-serif'; g.textAlign = 'right';
+  [0, .5, 1].forEach(p => g.fillText(Math.round(p * 100) + '%', L - 8, y(p) + 4));
+  g.textAlign = 'center';
+  [0, 45, 90, 135, 180].forEach(d => g.fillText(d + '°', x(d), B + 18));
+  g.fillText('太陽からの角度', (L + Rr) / 2, H - 4);
+  g.strokeStyle = css('--accent'); g.lineWidth = 2.5; g.beginPath();
+  for (let d = 0; d <= 180; d += 1) { const px = x(d), py = y(rayleigh(d)); d ? g.lineTo(px, py) : g.moveTo(px, py); }
+  g.stroke();
+  g.fillStyle = css('--sun'); g.beginPath(); g.arc(x(0), B, 7, 0, 7); g.fill();
+  g.fillStyle = css('--ink'); g.beginPath(); g.arc(x(gd), y(v), 6, 0, 7); g.fill();
+}
+$('sky-g').addEventListener('input', skyDraw);
+skyDraw();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { pfDraw(); skyDraw(); });
+</script>
+</body>
+</html>
