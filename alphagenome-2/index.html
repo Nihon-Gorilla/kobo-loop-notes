@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta property="og:title" content="AlphaGenome 2 のしくみ">
+<meta property="og:description" content="Google DeepMind の AlphaGenome 2 を前提知識なしで説明します。DNA の 1 文字を変えて試せる模型つき。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>AlphaGenome 2 のしくみ</title>
+<meta name="description" content="Google DeepMind が 2026-11-11 に発表した AlphaGenome 2 を、前提知識なしで順番に説明します。DNA の 1 文字を変えて試せる模型つき。">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。塩基は A 緑・C 青・G 琥珀・T 赤で全編通す */
+:root{
+  --paper:#f3f5f4; --sheet:#ffffff; --ink:#18221f; --soft:#4b5a55; --faint:#86948f; --rule:#d5ddda;
+  --accent:#5b3fa8; --accent-bg:#eee9fa;
+  --A:#1f8a4c; --C:#2563b8; --G:#b07400; --T:#c0392b;
+  --good:#1f8a4c; --bad:#c0392b;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0f1513; --sheet:#161e1b; --ink:#e6eeeb; --soft:#a9b8b3; --faint:#6d7c77; --rule:#2a3531;
+  --accent:#b9a4ff; --accent-bg:#241d3a;
+  --A:#5fd394; --C:#7fb0ff; --G:#ffc457; --T:#ff8a7a; --good:#5fd394; --bad:#ff8a7a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0f1513; --sheet:#161e1b; --ink:#e6eeeb; --soft:#a9b8b3; --faint:#6d7c77; --rule:#2a3531;
+  --accent:#b9a4ff; --accent-bg:#241d3a;
+  --A:#5fd394; --C:#7fb0ff; --G:#ffc457; --T:#ff8a7a; --good:#5fd394; --bad:#ff8a7a; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--accent)}
+header p{color:var(--soft);margin:10px 0 0}
+.strand{font-family:var(--f-data);font-size:13px;letter-spacing:.18em;overflow:hidden;white-space:nowrap;margin-top:14px;opacity:.85}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--accent)}
+code,.num{font-family:var(--f-data);font-size:.9em}
+.bA{color:var(--A)}.bC{color:var(--C)}.bG{color:var(--G)}.bT{color:var(--T)}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--accent);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--accent);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+figure{margin:6px 0;display:flex;flex-direction:column;gap:8px}
+figure .draw{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:12px;overflow-x:auto}
+figure svg{display:block;max-width:100%;height:auto;min-width:560px;color:var(--ink)}
+figcaption{font-size:13.5px;color:var(--soft);line-height:1.65}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+.lab{background:var(--accent-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--accent)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:700}
+.chip:focus-visible,.base:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.genes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.gene{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:8px 10px;font-size:13.5px;line-height:1.45;transition:opacity .2s}
+.gene b{font-family:var(--f-data);font-size:13px;display:block}
+.gene.off{opacity:.35}
+.gene .st{font-family:var(--f-data);font-size:11px;letter-spacing:.1em}
+.gene.on .st{color:var(--good)}
+.seq{display:flex;flex-wrap:wrap;gap:2px;font-family:var(--f-data);font-size:15px}
+.base{width:1.55em;height:1.9em;border:1px solid var(--rule);background:var(--sheet);border-radius:2px;cursor:pointer;font:600 15px var(--f-data);padding:0;display:grid;place-items:center}
+.base.m-pro{box-shadow:inset 0 -3px 0 var(--C)}
+.base.m-enh{box-shadow:inset 0 -3px 0 var(--G)}
+.base.changed{background:var(--accent-bg);border-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--soft)}
+.legend i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:6px}
+.meter{display:grid;grid-template-columns:7.5em minmax(0,1fr) 4em;gap:10px;align-items:center;font-size:14px}
+.meter .t{height:16px;background:var(--sheet);border:1px solid var(--rule);border-radius:2px;position:relative}
+.meter .t i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:1px;transition:width .25s}
+.meter .v{font-family:var(--f-data);text-align:right;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.meter .t i,.gene{transition:none}}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:11em minmax(0,1fr) 3.5em;gap:10px;align-items:center;font-size:13.5px}
+@media (max-width:560px){.bar{grid-template-columns:minmax(0,1fr) 3.5em}.bar>span:first-child{grid-column:1/-1}}
+.bar .t{height:14px;background:var(--sheet);border:1px solid var(--rule);border-radius:2px;position:relative}
+.bar .t i{position:absolute;inset:0 auto 0 0;border-radius:1px}
+.bar .v{font-family:var(--f-data);text-align:right;font-variant-numeric:tabular-nums}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が発表されたか</a></li>
+    <li><a href="#s2">同じ DNA、違う細胞</a></li>
+    <li><a href="#s3">遺伝子の外にあるスイッチ</a></li>
+    <li><a href="#s4">AlphaGenome 2 が読むもの</a></li>
+    <li><a href="#s5">1 文字変えると何が起きるか</a></li>
+    <li><a href="#s6">初代から何が変わったか</a></li>
+    <li><a href="#s7">成績の数字の読み方</a></li>
+    <li><a href="#s8">できないこと</a></li>
+    <li><a href="#s9">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>AlphaGenome 2 の<em>しくみ</em></h1>
+  <p>2026 年 11 月 11 日に Google DeepMind が発表した、DNA の読み方を予測する AI を、前提知識なしで順番に説明します。生物は中学理科の範囲から始めます。数字は発表記事に書かれた値だけを使っています。</p>
+  <div class="strand" id="strand" aria-hidden="true"></div>
+  <div class="meta">2026-11-18 版 ・ 読む時間の目安 15 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が発表されたか</h2>
+  <p>AlphaGenome 2 は、<strong>DNA の並びを読んで、その DNA が細胞の中でどう使われるかを予測する AI</strong> です。2025 年に出た AlphaGenome の後継で、今回は「どの種類の細胞で」という条件を指定して予測できるようになりました。</p>
+  <ul>
+    <li>非営利の研究向けには、発表日から API で使えます。企業の研究向けは Google Cloud で限定公開中です。</li>
+    <li>発表記事は「研究用であり、診断や治療に使うための検証や承認は受けていない」と明記しています。</li>
+  </ul>
+  <div class="key"><b>KEY</b>一言でいうと「DNA の 1 文字の違いが、どの細胞で、どの遺伝子の働きをどれだけ変えるか」を見積もる道具です。病気に関係する変異の候補を絞る研究に使われます。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>同じ DNA、違う細胞</h2>
+  <p>人の体の細胞は、ほぼすべてが同じ DNA を持っています。肝臓の細胞も、血液の免疫細胞も、設計図の中身は同じです。違うのは<strong>設計図のどのページを開いているか</strong>です。</p>
+  <p>DNA の中で、タンパク質の作り方が書かれた区切りを<strong>遺伝子</strong>と呼びます。人には約 2 万個あります。細胞は、その中から自分の仕事に必要な遺伝子だけを読み出して使います。遺伝子が読み出されることを<strong>発現</strong>と呼びます。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 細胞ごとに開くページ</b>
+    <div class="row" role="group" aria-label="細胞の種類">
+      <button class="chip" type="button" data-cell="liver" aria-pressed="true">肝臓の細胞</button>
+      <button class="chip" type="button" data-cell="beta" aria-pressed="false">すい臓の β 細胞</button>
+      <button class="chip" type="button" data-cell="tcell" aria-pressed="false">免疫の T 細胞</button>
+      <button class="chip" type="button" data-cell="skin" aria-pressed="false">皮膚の細胞</button>
+    </div>
+    <div class="genes" id="genes"></div>
+    <p class="note">DNA は 4 つの細胞で同じです。働く遺伝子だけが変わります。ここに出しているのは代表的な 5 個だけで、実際には 1 つの細胞で何千個もの遺伝子が働いています。</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>遺伝子の外にあるスイッチ</h2>
+  <p>では、細胞はどうやって「このページを開く」を決めているのか。手がかりは遺伝子の<strong>外</strong>にあります。人の DNA のうち、タンパク質の作り方そのものが書かれた部分は 2 % 程度です。残りの大部分には、遺伝子をいつ・どこで・どれだけ読むかを決める<strong>スイッチ</strong>のような並びが散らばっています。</p>
+  <ul>
+    <li><strong>プロモーター</strong>：遺伝子のすぐ手前にあり、「ここから読み始める」という合図になる並び。</li>
+    <li><strong>エンハンサー</strong>：遺伝子から遠く離れていることもある、「もっと読め」と後押しする並び。特定のタンパク質（転写因子）がくっつくと働きます。その転写因子がいる細胞でだけ効くので、細胞ごとの違いが生まれます。</li>
+  </ul>
+  <p>病気になりやすさに関わる DNA の違いを大規模に探すと、見つかる場所の大半はこのスイッチ側、つまり遺伝子の外です。遺伝子の外の 1 文字の違いが、どの遺伝子のスイッチをどの細胞で狂わせるのか。人が実験で 1 つずつ確かめるには数が多すぎます。ここを予測で絞り込むのが AlphaGenome の役目です。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>AlphaGenome 2 が読むもの</h2>
+  <figure>
+    <div class="draw">
+    <svg viewBox="0 0 760 250" role="img" aria-label="入力は 100 万文字の DNA と細胞の条件。出力は 4 種類の予測">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+      <g font-family="sans-serif" font-size="12.5" fill="currentColor">
+        <rect x="16" y="40" width="200" height="56" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="116" y="64" text-anchor="middle">DNA の並び</text>
+        <text x="116" y="82" text-anchor="middle" font-size="11" opacity=".75">100 万文字（A・C・G・T）</text>
+        <rect x="16" y="140" width="200" height="66" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="116" y="164" text-anchor="middle" fill="var(--accent)">条件（どの細胞か）</text>
+        <text x="116" y="182" text-anchor="middle" font-size="11" fill="var(--accent)">組織・細胞の種類・状態</text>
+        <text x="116" y="197" text-anchor="middle" font-size="10.5" fill="var(--accent)">カタログから選ぶか、自分の実験データから作る</text>
+        <path d="M216 68 H262 V112 H286" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+        <path d="M216 172 H262 V128 H286" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="292" y="84" width="150" height="72" fill="var(--sheet)" stroke="currentColor" stroke-width="2"/>
+        <text x="367" y="116" text-anchor="middle" font-weight="bold">AlphaGenome 2</text>
+        <text x="367" y="136" text-anchor="middle" font-size="11" opacity=".75">条件を各段で使う</text>
+        <line x1="442" y1="120" x2="486" y2="120" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+        <rect x="492" y="22" width="252" height="44" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="504" y="42">遺伝子の発現</text><text x="504" y="58" font-size="10.5" opacity=".75">どの遺伝子がどれだけ読まれるか</text>
+        <rect x="492" y="74" width="252" height="44" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="504" y="94">クロマチンの開き具合</text><text x="504" y="110" font-size="10.5" opacity=".75">DNA がほどけて読める状態か</text>
+        <rect x="492" y="126" width="252" height="44" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="504" y="146">ヒストン修飾</text><text x="504" y="162" font-size="10.5" opacity=".75">DNA を巻く糸巻きに付いた目印</text>
+        <rect x="492" y="178" width="252" height="44" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="2"/><text x="504" y="198" fill="var(--accent)">DNA メチル化（今回追加）</text><text x="504" y="214" font-size="10.5" fill="var(--accent)">読ませないための化学的な目印</text>
+        <text x="380" y="242" text-anchor="middle" font-size="11" opacity=".75">1 回の予測は 1 つの条件について。細胞を変えれば同じ DNA でも答えが変わる</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>入力は 100 万文字分の DNA と、「どの細胞か」という条件の 2 つ。出力は、その細胞で DNA がどう扱われるかの 4 種類の予測です。紫の部分が今回の新しい要素です。</figcaption>
+  </figure>
+  <p>100 万文字を一度に読むのは、エンハンサーが遺伝子から何十万文字も離れていることがあるからです。短く切って読むと、遠くのスイッチと遺伝子の関係を見落とします。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>1 文字変えると何が起きるか</h2>
+  <p>AlphaGenome の使い方の基本は「比べる」ことです。元の DNA と、1 文字だけ変えた DNA をそれぞれ予測にかけ、出力の差を見ます。差が大きければ、その 1 文字は大事なスイッチの一部だった可能性が高い、と考えます。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 1 文字変えてみる（模型）</b>
+    <div class="row" role="group" aria-label="細胞の種類">
+      <span>細胞：</span>
+      <button class="chip" type="button" data-cond="tcell" aria-pressed="true">免疫の T 細胞</button>
+      <button class="chip" type="button" data-cond="liver" aria-pressed="false">肝臓の細胞</button>
+    </div>
+    <div class="seq" id="seq" aria-label="DNA の並び。文字を押すと変わる"></div>
+    <div class="legend"><span><i style="background:var(--G)"></i>エンハンサー（T 細胞の転写因子がくっつく）</span><span><i style="background:var(--C)"></i>プロモーター（読み始めの合図）</span></div>
+    <div class="meter"><span>遺伝子の発現</span><span class="t"><i id="m-bar"></i></span><span class="v" id="m-val"></span></div>
+    <p id="m-msg" style="font-weight:500"></p>
+    <div class="row"><button class="chip" type="button" id="m-reset">元に戻す</button></div>
+    <p class="note">文字を押すと A → C → G → T の順に変わります。これは本物の AlphaGenome ではなく、考え方を見るための 60 文字の模型です。本物は 100 万文字を読み、どの並びがスイッチかも人が教えずに学習で見つけます。</p>
+  </div>
+  <p>模型で試すと、同じ 1 文字の変化でも、T 細胞では発現が大きく下がり、肝臓の細胞ではほとんど変わらないことがあります。エンハンサーにくっつく転写因子が肝臓の細胞にはいないからです。<strong>変異の影響は細胞によって違う</strong>。これが AlphaGenome 2 が「条件」を入力に取る理由です。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>初代から何が変わったか</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th>AlphaGenome（初代）</th><th>AlphaGenome 2</th></tr>
+    <tr><td><strong>細胞の指定</strong></td><td>多数の組織の結果を一度に並べて出す</td><td>条件を 1 つ指定し、その細胞についてだけ予測する</td></tr>
+    <tr><td><strong>細かさ</strong></td><td>組織単位。近い種類の細胞の違いは苦手</td><td>1 個 1 個の細胞のデータ（単一細胞）で学習し、細胞の種類を細かく分けられる</td></tr>
+    <tr><td><strong>予測するもの</strong></td><td>発現、クロマチン、ヒストン修飾など</td><td>上に加えて DNA メチル化</td></tr>
+    <tr><td><strong>新しい細胞</strong></td><td>学習済みの組織のみ</td><td>数十個程度の細胞の測定データを渡せば、再学習なしで条件として使える</td></tr>
+    <tr><td><strong>測っていない項目</strong></td><td>なし</td><td>1 種類の測定から、測っていない別の項目を予測で補える</td></tr>
+  </table></div>
+  <p>記事の説明では、初代のように全部の組織を並べて出す方式は、モデルの力が分散して、近い細胞どうしの微妙な違いを捉えにくかった、とされています。条件を入力に回して「1 回に 1 つの細胞に集中する」形に変えたのが一番大きな変更です。学習には、人とマウスの 1 億 710 万個以上の単一細胞のデータが使われています。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>成績の数字の読み方</h2>
+  <p>記事に載っている代表的な数字は、免疫細胞 28 種類のデータ（TenK10K）での比較です。比べる相手は、単一細胞データで追加学習させた初代などの、これまでの最良の方法です。</p>
+  <div class="bars">
+    <div class="bar"><span>原因の変異を当てた割合・従来</span><span class="t"><i style="width:16%;background:var(--faint)"></i></span><span class="v">16 %</span></div>
+    <div class="bar"><span>同・AlphaGenome 2</span><span class="t"><i style="width:30%;background:var(--accent)"></i></span><span class="v">30 %</span></div>
+    <div class="bar"><span>効く向き（上げるか下げるか）・従来</span><span class="t"><i style="width:23%;background:var(--faint)"></i></span><span class="v">23 %</span></div>
+    <div class="bar"><span>同・AlphaGenome 2</span><span class="t"><i style="width:43%;background:var(--accent)"></i></span><span class="v">43 %</span></div>
+  </div>
+  <ul>
+    <li><strong>ほぼ 2 倍</strong>になっています。記事全体でも「遺伝子の発現を変える変異を、従来のほぼ 2 倍の数見つけた」と書かれています。</li>
+    <li>一方で、30 % は「10 個のうち 7 個は当たらない」という意味でもあります。実験の候補を絞る道具としては大きな前進ですが、答えをそのまま信じられる段階ではありません。</li>
+    <li>炎症性腸疾患に関わる <code>ETS2</code> という遺伝子の既知の事例を、計算の上で再現できたことも報告されています。</li>
+  </ul>
+  <div class="key"><b>KEY</b>これらの数字は、開発チーム自身が選んだデータと比較条件での報告です。ほかの研究者による検証はこれからです。</div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">8</span>できないこと</h2>
+  <div class="key warn"><b>NOTE</b>自分の遺伝子検査の結果を入れて病気のリスクを知る、といった使い方はできません。発表記事は、研究用途に限ること、臨床や診断のための検証・承認を受けていないことを明記しています。</div>
+  <ul>
+    <li>予測は「その細胞でスイッチがどう動きそうか」までです。病気になるかどうかは、ほかの遺伝子や環境も絡むので、この予測だけでは決まりません。</li>
+    <li>1 回の予測で見るのは 1 つの条件です。体全体への影響は、条件を変えて何度も予測し、人が組み合わせて解釈します。</li>
+    <li>当たる割合は 7 章のとおりで、最後は実験での確認が要ります。</li>
+  </ul>
+</section>
+
+<section id="s9">
+  <h2><span class="n">9</span>用語集</h2>
+  <dl>
+    <dt>DNA・塩基</dt><dd>設計図にあたる分子。A・C・G・T の 4 種類の文字（塩基）の並びで情報を持つ。</dd>
+    <dt>遺伝子</dt><dd>DNA の中で、タンパク質などの作り方が書かれた区切り。人では約 2 万個。</dd>
+    <dt>発現</dt><dd>遺伝子が読み出されて使われること。</dd>
+    <dt>変異</dt><dd>人によって DNA の文字が違う場所。1 文字の違いが多い。</dd>
+    <dt>プロモーター</dt><dd>遺伝子の手前にある、読み始めの合図の並び。</dd>
+    <dt>エンハンサー</dt><dd>遺伝子の働きを後押しする並び。遠く離れていることもある。</dd>
+    <dt>転写因子</dt><dd>DNA の特定の並びにくっついて、遺伝子のスイッチを入れたり切ったりするタンパク質。</dd>
+    <dt>クロマチン</dt><dd>DNA が糸巻き（ヒストン）に巻かれた状態。固く巻かれていると読めない。</dd>
+    <dt>ヒストン修飾</dt><dd>糸巻きに付く化学的な目印。読みやすさを変える。</dd>
+    <dt>DNA メチル化</dt><dd>DNA に付く化学的な目印。付いた場所の近くの遺伝子は読まれにくくなることが多い。</dd>
+    <dt>単一細胞データ</dt><dd>細胞を 1 個ずつ測ったデータ。組織をまとめて測るより、細胞の種類の違いが見える。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>発表記事：<a href="https://deepmind.google/blog/alphagenome-2-deciphering-how-cells-read-dna-to-better-understand-disease/" target="_blank" rel="noopener">AlphaGenome 2: Deciphering how cells read DNA to better understand disease</a>（Google DeepMind、2026-11-11）。論文の PDF へのリンクと、試せる Colab の案内があります。</li>
+  </ul>
+</section>
+
+<footer>
+  <span>数字の出どころ：Google DeepMind の発表記事（2026-11-11 公開、11-16 更新）。2 章と 5 章の「触って確かめる」は説明のための模型で、実際のデータではありません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const colorOf = b => ({A:'var(--A)',C:'var(--C)',G:'var(--G)',T:'var(--T)'})[b];
+
+// 見出しの飾りの塩基列
+(() => {
+  const s = 'ATGGCCGGAAGTTTATAAAGGCTACGTTCAGGAAGTCCATGCGTACCGATTGCAATGGCTTACGGAAGCTATAAAGC';
+  $('strand').innerHTML = s.split('').map(b => `<span style="color:${colorOf(b)}">${b}</span>`).join('');
+})();
+
+// 2 章：細胞ごとの遺伝子
+const GENES = [
+  {id:'ALB', name:'アルブミン', role:'血液のタンパク質を作る', on:['liver']},
+  {id:'INS', name:'インスリン', role:'血糖を下げるホルモン', on:['beta']},
+  {id:'CD3E', name:'CD3', role:'T 細胞が異物を見分ける部品', on:['tcell']},
+  {id:'KRT14', name:'ケラチン 14', role:'皮膚を丈夫にする繊維', on:['skin']},
+  {id:'ACTB', name:'アクチン', role:'細胞の骨組み（どの細胞でも使う）', on:['liver','beta','tcell','skin']},
+];
+function drawGenes(cell){
+  $('genes').innerHTML = GENES.map(g => {
+    const on = g.on.includes(cell);
+    return `<div class="gene ${on?'on':'off'}"><b>${g.id}</b>${g.name}<br><span style="color:var(--soft);font-size:12.5px">${g.role}</span><div class="st">${on?'● 働いている':'○ 休んでいる'}</div></div>`;
+  }).join('');
+}
+document.querySelectorAll('[data-cell]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-cell]').forEach(x => x.setAttribute('aria-pressed', x===b));
+  drawGenes(b.dataset.cell);
+}));
+drawGenes('liver');
+
+// 5 章：1 文字変える模型
+const ORIG = 'CTAGCATTCAGGAAGTGCATCGTACGATCCTGACGTTAGCTGCATTATAAAGGCTCGATG';
+const ENH = [10, 16];   // GGAAGT（ETS 系の転写因子がくっつく核 GGAA を含む並び）
+const PRO = [44, 50];   // TATAAA
+let seq = ORIG.split(''), cond = 'tcell';
+const inR = (i, r) => i >= r[0] && i < r[1];
+function score(){
+  const s = seq.join('');
+  const pro = s.slice(PRO[0], PRO[1]) === 'TATAAA' ? 1 : 0.08;
+  const core = s.slice(ENH[0], ENH[1]);
+  const enhMatch = core.slice(1,5) === 'GGAA' ? 1 : (core.indexOf('GGA') >= 0 ? 0.35 : 0);
+  const boost = cond === 'tcell' ? 3 * enhMatch : 0;
+  return pro * (1 + boost) / 4; // 0〜1
+}
+function drawSeq(){
+  $('seq').innerHTML = seq.map((b, i) => {
+    const cls = ['base', inR(i,ENH)?'m-enh':'', inR(i,PRO)?'m-pro':'', b!==ORIG[i]?'changed':''].join(' ');
+    return `<button type="button" class="${cls}" data-i="${i}" style="color:${colorOf(b)}" aria-label="${i+1} 文字目 ${b}">${b}</button>`;
+  }).join('');
+  const v = score(), base = (() => { const k = seq; seq = ORIG.split(''); const r = score(); seq = k; return r; })();
+  $('m-bar').style.width = (v*100).toFixed(0) + '%';
+  $('m-val').textContent = (v*100).toFixed(0);
+  const changed = seq.some((b,i) => b !== ORIG[i]);
+  const d = v - base, el = $('m-msg');
+  if (!changed) { el.textContent = cond==='tcell' ? 'T 細胞ではエンハンサーが効いて、よく読まれています。文字を押して変えてみてください。' : '肝臓の細胞では、エンハンサーにくっつく転写因子がいないので、プロモーターの分だけ読まれています。'; el.style.color = 'var(--ink)'; }
+  else if (Math.abs(d) < 0.02) { el.textContent = 'ほとんど変わりません。この細胞では、変えた場所はスイッチとして働いていません。'; el.style.color = 'var(--soft)'; }
+  else if (d < 0) { el.textContent = `発現が ${Math.round(-d/base*100)} % 下がりました。変えた文字はこの細胞で大事なスイッチの一部です。`; el.style.color = 'var(--bad)'; }
+  else { el.textContent = '発現が上がりました。'; el.style.color = 'var(--good)'; }
+}
+$('seq').addEventListener('click', e => {
+  const t = e.target.closest('.base'); if (!t) return;
+  const i = +t.dataset.i, order = 'ACGT';
+  seq[i] = order[(order.indexOf(seq[i]) + 1) % 4];
+  drawSeq();
+  const nb = $('seq').querySelector(`[data-i="${i}"]`); if (nb) nb.focus();
+});
+document.querySelectorAll('[data-cond]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-cond]').forEach(x => x.setAttribute('aria-pressed', x===b));
+  cond = b.dataset.cond; drawSeq();
+}));
+$('m-reset').addEventListener('click', () => { seq = ORIG.split(''); drawSeq(); });
+drawSeq();
+</script>
+</body>
+</html>
