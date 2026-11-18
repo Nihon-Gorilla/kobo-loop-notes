@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="note の AI 参照対価の発表をきっかけに、AI の「学習」と「参照（RAG）」の違いを前提知識なしで説明します。参照のしくみを試せる模型つき。">
+<meta property="og:title" content="AI の「学習」と「参照」">
+<meta property="og:description" content="note の AI 参照対価の発表をきっかけに、AI の「学習」と「参照」の違いを説明します。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>AIの「学習」と「参照」</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。「学習」= 灰紫、「参照」= 緑で全編通す */
+:root{
+  --paper:#f4f5f2; --sheet:#ffffff; --ink:#1b1f1a; --soft:#4f574d; --faint:#8a9287; --rule:#d8dcd4;
+  --ref:#1d7a57; --ref-bg:#e3f2ea; --learn:#6b5a8e; --learn-bg:#efebf6; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#101310; --sheet:#171b17; --ink:#e7ebe5; --soft:#aab3a7; --faint:#6e766b; --rule:#2b322a;
+  --ref:#6fd6a5; --ref-bg:#11291e; --learn:#b9a8e0; --learn-bg:#221d30; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#101310; --sheet:#171b17; --ink:#e7ebe5; --soft:#aab3a7; --faint:#6e766b; --rule:#2b322a;
+  --ref:#6fd6a5; --ref-bg:#11291e; --learn:#b9a8e0; --learn-bg:#221d30; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 .l{color:var(--learn)} header h1 .r{color:var(--ref)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--ref)}
+code{font-family:var(--f-data);font-size:.9em}
+.L{color:var(--learn);font-weight:700}.R{color:var(--ref);font-weight:700}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--ref);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--ref);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+figure{margin:6px 0;display:flex;flex-direction:column;gap:8px}
+figure .draw{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:12px;overflow-x:auto}
+figure svg{display:block;max-width:100%;height:auto;min-width:540px;color:var(--ink)}
+figcaption{font-size:13.5px;color:var(--soft);line-height:1.65}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+.lab{background:var(--ref-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--ref)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab label.s{min-width:10em}
+.lab input[type=range]{accent-color:var(--ref);width:min(240px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer;text-align:left}
+.chip[aria-pressed="true"]{border-color:var(--ref);color:var(--ref);font-weight:700}
+.chip.lrn[aria-pressed="true"]{border-color:var(--learn);color:var(--learn)}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--ref);outline-offset:2px}
+.docs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.doc{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:8px 10px;font-size:13px;line-height:1.5;display:flex;flex-direction:column;gap:4px;transition:opacity .2s,border-color .2s}
+.doc b{font-size:13.5px}
+.doc .sc{font-family:var(--f-data);font-size:11.5px;color:var(--faint)}
+.doc.hit{border-color:var(--ref);box-shadow:inset 3px 0 0 var(--ref)}
+.doc.dim{opacity:.45}
+.answer{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:12px 14px;font-size:14.5px;display:flex;flex-direction:column;gap:6px}
+.answer .src{font-size:12.5px;color:var(--ref)}
+.answer.lrn .src{color:var(--learn)}
+@media (prefers-reduced-motion:reduce){.doc{transition:none}}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.split div{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:8px 10px;font-size:13px}
+.split div b{display:block;font-family:var(--f-data);font-size:18px;font-variant-numeric:tabular-nums}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が発表されたか</a></li>
+    <li><a href="#s2">AI が文章を使う 2 つの方法</a></li>
+    <li><a href="#s3">学習：重みに溶け込む</a></li>
+    <li><a href="#s4">参照：答える時に読みに行く</a></li>
+    <li><a href="#s5">お金はどう流れるか</a></li>
+    <li><a href="#s6">対象になるもの、ならないもの</a></li>
+    <li><a href="#s7">学習拒否の設定との関係</a></li>
+    <li><a href="#s8">まだ分からないこと</a></li>
+    <li><a href="#s9">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>AI の<span class="l">「学習」</span>と<span class="r">「参照」</span></h1>
+  <p>note が 2026 年 11 月 18 日、AI に記事を「参照」された書き手へ対価を配ると発表しました。ここでいう参照とは何で、よく聞く「学習」とどう違うのか。前提知識なしで順番に説明します。事実は note の公式発表だけをもとにしています。</p>
+  <div class="meta">2026-11-19 版 ・ 読む時間の目安 12 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が発表されたか</h2>
+  <ul>
+    <li>note は AI 事業者から、AI がnote の記事を<strong>参照</strong>したことへの対価を受け取りました。そこから note の運営手数料を引いた分を、記事の書き手に配ります。</li>
+    <li>対象は、2026 年 4 月〜7 月に公開記事が AI の回答に参照された実績のある書き手です。申し込みは不要で、対象者にはメールで連絡が来ます。</li>
+    <li>支払いは 2026 年 12 月中旬の予定で、銀行振込か Amazon ギフトカードです。受け取りを辞退することもできます。</li>
+  </ul>
+  <div class="key"><b>KEY</b>発表は「学習」と「参照」をはっきり分けていて、今回お金が出るのは<strong>参照</strong>の方です。この 2 つの違いが分かると、発表の意味がつかめます。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>AI が文章を使う 2 つの方法</h2>
+  <p>ChatGPT や Claude のような AI が、人の書いた文章を使う方法は大きく 2 つあります。</p>
+  <div class="tbl"><table>
+    <tr><th></th><th><span class="L">学習</span></th><th><span class="R">参照</span></th></tr>
+    <tr><td><strong>いつ</strong></td><td>AI を作る時に 1 回</td><td>質問に答えるたびに毎回</td></tr>
+    <tr><td><strong>何をする</strong></td><td>大量の文章を読ませて、言葉の使い方や知識を中の数字（重み）に染み込ませる</td><td>質問に関係する記事を探して読み、それをもとに答えを書く</td></tr>
+    <tr><td><strong>元の記事は</strong></td><td>そのままの形では残らない</td><td>答えを作るその時に、そのまま読まれる</td></tr>
+    <tr><td><strong>どの記事を使ったか</strong></td><td>後から特定するのはとても難しい</td><td>記録できる。出典として示すこともできる</td></tr>
+    <tr><td><strong>たとえるなら</strong></td><td>何年もかけて本を読んだ人の「知識」</td><td>答える前に図書館で開いた「資料」</td></tr>
+  </table></div>
+  <p>最後の行の違いが大事です。参照なら「どの記事が、いつ、何回使われたか」を数えられます。数えられるから、使われた分に応じてお金を配る、という仕組みが作りやすいのです。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>学習：重みに溶け込む</h2>
+  <p>AI の中身は、何十億、何千億という数字（<strong>重み</strong>）の集まりです。学習では、文章の続きを当てる練習を膨大な回数くり返し、当たりやすくなるように重みを少しずつ動かします。</p>
+  <p>こうして身についた知識は、特定の記事の形では残りません。1 本の記事の影響は、無数の重みにほんの少しずつ混ざっています。そのため、ある答えが「どの記事から来たか」を後から突き止めるのはとても難しく、記事ごとに使用量を数えて対価を払う仕組みにはしにくいのです。</p>
+  <p>もう 1 つの性質として、学習は AI を作る時に終わっているので、<strong>その後に書かれた記事は知りません</strong>。新しい話題に答えるには、別の方法が要ります。それが参照です。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>参照：答える時に読みに行く</h2>
+  <p>参照の流れは 3 段です。この方式は <strong>RAG</strong>（検索で補った生成）とも呼ばれます。</p>
+  <ol>
+    <li><strong>探す</strong>：質問に関係しそうな記事を、検索で何本か選ぶ。</li>
+    <li><strong>読む</strong>：選んだ記事の本文を、質問と一緒に AI に渡す。</li>
+    <li><strong>答える</strong>：AI は渡された記事をもとに答えを書き、出典を添える。</li>
+  </ol>
+  <div class="lab">
+    <b>触って確かめる ・ 参照のしくみ（模型）</b>
+    <div class="row" role="group" aria-label="質問">
+      <span>質問：</span>
+      <button class="chip" type="button" data-q="0" aria-pressed="true">サワークリームの代わりは？</button>
+      <button class="chip" type="button" data-q="1" aria-pressed="false">朝の散歩は何分がいい？</button>
+      <button class="chip" type="button" data-q="2" aria-pressed="false">観葉植物の水やりの頻度は？</button>
+    </div>
+    <div class="row" role="group" aria-label="答え方">
+      <span>答え方：</span>
+      <button class="chip" type="button" data-m="ref" aria-pressed="true">参照して答える</button>
+      <button class="chip lrn" type="button" data-m="learn" aria-pressed="false">学習した知識だけで答える</button>
+    </div>
+    <div class="docs" id="docs"></div>
+    <div class="answer" id="answer"></div>
+    <p class="note">6 本の記事は、この説明のために作った架空のものです。検索は「質問と記事に共通する言葉の数」で点数を付ける単純なやり方にしています。本物の AI は、意味の近さで探すなど、もっと賢い方法を使います。</p>
+  </div>
+  <p>参照して答えると、どの記事を何回読んだかが記録に残ります。今回 note が受け取った対価は、この「読まれた」実績に対するものです。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>お金はどう流れるか</h2>
+  <figure>
+    <div class="draw">
+    <svg viewBox="0 0 720 190" role="img" aria-label="AI 事業者から note へ対価が払われ、手数料を引いて書き手に分配される">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+      <g font-family="sans-serif" font-size="12.5" fill="currentColor">
+        <rect x="14" y="56" width="150" height="70" fill="var(--sheet)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="89" y="86" text-anchor="middle">AI 事業者</text><text x="89" y="104" text-anchor="middle" font-size="10.5" opacity=".75">名前は非公表</text>
+        <line x1="164" y1="91" x2="268" y2="91" stroke="var(--ref)" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="216" y="82" text-anchor="middle" font-size="11" fill="var(--ref)">参照の対価</text>
+        <rect x="274" y="56" width="160" height="70" fill="var(--sheet)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="354" y="86" text-anchor="middle">note</text><text x="354" y="104" text-anchor="middle" font-size="10.5" opacity=".75">運営手数料を差し引く</text>
+        <line x1="434" y1="91" x2="538" y2="91" stroke="var(--ref)" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="486" y="82" text-anchor="middle" font-size="11" fill="var(--ref)">参照の実績などに</text><text x="486" y="112" text-anchor="middle" font-size="11" fill="var(--ref)">応じて分配</text>
+        <rect x="544" y="56" width="160" height="70" fill="var(--ref-bg)" stroke="var(--ref)" stroke-width="2"/>
+        <text x="624" y="86" text-anchor="middle" fill="var(--ref)">書き手</text><text x="624" y="104" text-anchor="middle" font-size="10.5" fill="var(--ref)">4〜7 月に参照された人</text>
+        <text x="360" y="168" text-anchor="middle" font-size="11" opacity=".8">総額、手数料の率、1 人あたりの計算方法はどれも公表されていない</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>発表から分かるお金の流れ。分配は「AI サービスでの参照の実績などに応じて」とだけ書かれています。</figcaption>
+  </figure>
+  <div class="lab">
+    <b>触って確かめる ・ もし参照回数に比例して分けたら（仮の計算）</b>
+    <div class="row"><label class="s" for="t">AI 事業者からの対価</label><input type="range" id="t" min="100" max="5000" step="100" value="1000"><output id="t-o"></output></div>
+    <div class="row"><label class="s" for="f">note の手数料</label><input type="range" id="f" min="0" max="50" step="5" value="20"><output id="f-o"></output></div>
+    <div class="row"><label class="s" for="m">あなたの記事の参照回数</label><input type="range" id="m" min="0" max="2000" step="10" value="300"><output id="m-o"></output></div>
+    <div class="row"><label class="s" for="a">全記事の参照回数の合計</label><input type="range" id="a" min="100000" max="10000000" step="100000" value="2000000"><output id="a-o"></output></div>
+    <div class="split" id="split"></div>
+    <p class="note">金額も手数料の率も、すべてこの模型のための<strong>仮の数字</strong>です。note は総額も手数料の率も計算方法も公表していません。「参照回数に比例して分ける」というのも、考え方を見るための仮定です。</p>
+  </div>
+  <p>仮の計算で分かるのは、1 人の取り分は<strong>自分の参照回数が全体の何割か</strong>で決まる、ということです。全体の参照が増えれば、同じ回数でも割合は小さくなります。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>対象になるもの、ならないもの</h2>
+  <div class="tbl"><table>
+    <tr><th>対象</th><th>対象外</th></tr>
+    <tr><td>誰でも読める無料記事の<strong>文章</strong>部分</td><td>有料記事の有料部分<br>メンバーシップの特典<br>画像・音声・動画</td></tr>
+    <tr><td>2026 年 4〜7 月に AI の回答に参照された実績</td><td>それ以外の期間（今回の分としては）</td></tr>
+  </table></div>
+  <p>「誰でも読める文章」に限られているのは、4 章の流れで言えば、AI が検索して読みに行けるのは公開されている部分だけだからだと考えられます。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>学習拒否の設定との関係</h2>
+  <p>note には、記事を「生成 AI の学習に使わないでほしい」という意思を示す設定があります。発表によると：</p>
+  <ul>
+    <li>この設定をオンにしていても、AI による<strong>参照</strong>は行われる場合があります。</li>
+    <li>今回の対価は、この設定のオン・オフや、別の「AI 学習対価還元プログラム」に参加しているかどうかに関係なく、参照の実績がある人が対象です。</li>
+    <li>設定は、学習に対する意思表示として引き続き有効です。</li>
+  </ul>
+  <div class="key"><b>KEY</b>「学習に使わないで」と「答える時に読まないで」は別の話です。この設定が意思を示すのは前者だけで、後者には効かない場合がある、というのが発表の説明です。</div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">8</span>まだ分からないこと</h2>
+  <ul>
+    <li>どの AI 事業者と契約したか</li>
+    <li>対価の総額と、note の手数料の率</li>
+    <li>1 人あたりの額の具体的な計算方法</li>
+    <li>契約期間が終わった後も続くか（今後の協議で決まる、とされています）</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>このページの 5 章の金額はすべて仮の数字です。実際にいくら受け取れるかは、note から届く連絡で確かめてください。</div>
+</section>
+
+<section id="s9">
+  <h2><span class="n">9</span>用語集</h2>
+  <dl>
+    <dt>学習</dt><dd>大量の文章を読ませて、AI の中の数字（重み）を調整すること。AI を作る時に行う。</dd>
+    <dt>重み</dt><dd>AI の中にある膨大な数の数字。学習で決まり、知識や言葉の使い方を表す。</dd>
+    <dt>参照</dt><dd>AI が質問に答える時、関係する記事を探して読み、答えの材料にすること。</dd>
+    <dt>RAG</dt><dd>Retrieval-Augmented Generation。検索（参照）で補ってから答えを書く方式。</dd>
+    <dt>出典</dt><dd>答えの根拠にした記事。参照なら示すことができる。</dd>
+    <dt>学習拒否の設定</dt><dd>記事を生成 AI の学習に使わないでほしいという意思を示す、note の設定。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>note の公式発表：<a href="https://note.com/info/n/n19e062e42e9e" target="_blank" rel="noopener">note 公式のお知らせ（2026-11-18）</a></li>
+  </ul>
+</section>
+
+<footer>
+  <span>事実の出どころ：note の公式発表（2026-11-18 12:00 公開、2026-11-19 確認）。4 章と 5 章の「触って確かめる」は説明のための模型で、記事も金額も架空です。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// 4 章：参照の模型
+const DOCS = [
+  {t:'ヨーグルトでつくるディップ', a:'すぐ書く人', w:['サワークリーム','代わり','ヨーグルト','水切り','ディップ']},
+  {t:'週末のカレー記録', a:'カレー部', w:['カレー','スパイス','ヨーグルト']},
+  {t:'歩く習慣を 1 年続けて', a:'あるくノート', w:['散歩','朝','分','歩数','習慣']},
+  {t:'在宅勤務の朝のルーティン', a:'在宅のひと', w:['朝','コーヒー','散歩']},
+  {t:'ポトスを枯らさない水やり', a:'みどり日記', w:['観葉植物','水やり','頻度','土','乾いたら']},
+  {t:'ベランダ菜園はじめました', a:'ベランダ係', w:['土','プランター','水やり']},
+];
+const QS = [
+  {w:['サワークリーム','代わり'], ans:'水切りしたヨーグルトで代用できます。', learn:'ヨーグルトなどで代用できることが多いです。'},
+  {w:['朝','散歩','分'], ans:'まずは 1 日 20〜30 分を目安に、続けやすい長さから始めるとよいそうです。', learn:'一般には 20〜30 分程度がよく勧められます。'},
+  {w:['観葉植物','水やり','頻度'], ans:'土の表面が乾いたらたっぷり、が基本です。', learn:'土が乾いたら水をあげるのが一般的です。'},
+];
+let q = 0, mode = 'ref';
+function ragDraw(){
+  const Q = QS[q];
+  const scored = DOCS.map((d, i) => ({...d, i, s: d.w.filter(x => Q.w.includes(x)).length}));
+  const top = [...scored].filter(d => d.s > 0).sort((x, y) => y.s - x.s).slice(0, 2).map(d => d.i);
+  $('docs').innerHTML = scored.map(d => {
+    const hit = mode === 'ref' && top.includes(d.i);
+    const cls = mode === 'learn' ? 'doc dim' : hit ? 'doc hit' : 'doc';
+    return `<div class="${cls}"><b>${d.t}</b><span>${d.a}</span><span class="sc">${mode === 'ref' ? '共通する言葉 ' + d.s + (hit ? ' ・ 参照する' : '') : '読まない'}</span></div>`;
+  }).join('');
+  const el = $('answer');
+  if (mode === 'ref') {
+    el.className = 'answer';
+    el.innerHTML = `<span>${Q.ans}</span><span class="src">出典：${top.map(i => '「' + DOCS[i].t + '」' + DOCS[i].a).join('、')} ・ この 2 本の参照回数が 1 回ずつ増える</span>`;
+  } else {
+    el.className = 'answer lrn';
+    el.innerHTML = `<span>${Q.learn}</span><span class="src">出典：示せない（学習で身についた知識から答えたため、どの記事から来たか分からない）</span>`;
+  }
+}
+document.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-q]').forEach(x => x.setAttribute('aria-pressed', x === b)); q = +b.dataset.q; ragDraw();
+}));
+document.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-m]').forEach(x => x.setAttribute('aria-pressed', x === b)); mode = b.dataset.m; ragDraw();
+}));
+ragDraw();
+
+// 5 章：仮の分配
+const yen = n => Math.round(n).toLocaleString('ja-JP') + ' 円';
+function payDraw(){
+  const T = +$('t').value * 10000, f = +$('f').value / 100, m = +$('m').value, A = +$('a').value;
+  $('t-o').textContent = (+$('t').value).toLocaleString('ja-JP') + ' 万円';
+  $('f-o').textContent = Math.round(f * 100) + ' %';
+  $('m-o').textContent = m.toLocaleString('ja-JP') + ' 回';
+  $('a-o').textContent = A.toLocaleString('ja-JP') + ' 回';
+  const pool = T * (1 - f), share = A ? m / A : 0, mine = pool * share;
+  $('split').innerHTML = `<div>書き手に配る総額<b>${yen(pool)}</b></div><div>あなたの割合<b>${(share * 100).toFixed(4)} %</b></div><div>あなたの取り分<b>${yen(mine)}</b></div>`;
+}
+['t', 'f', 'm', 'a'].forEach(id => $(id).addEventListener('input', payDraw));
+payDraw();
+</script>
+</body>
+</html>
