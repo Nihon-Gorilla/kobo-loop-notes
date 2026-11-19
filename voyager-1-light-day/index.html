@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="ボイジャー1号が地球から1光日の距離に到達。光の時間で測る距離と、往復48時間の通信で探査機を動かすことを前提知識なしで説明します。">
+<meta property="og:title" content="ボイジャー 1 号と 1 光日">
+<meta property="og:description" content="光の時間で測る距離と、往復48時間の通信で探査機を動かすことを説明します。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ボイジャー1号と1光日</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。電波・光 = 金、地球 = 青で全編通す */
+:root{
+  --paper:#f3f3f6; --sheet:#ffffff; --ink:#191a26; --soft:#4d4f64; --faint:#8b8da2; --rule:#d9d9e3;
+  --gold:#a86b00; --gold-bg:#fbf1dc; --earth:#2a62c9; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0b0c14; --sheet:#13141f; --ink:#e9eaf3; --soft:#aeb0c6; --faint:#6c6e86; --rule:#272939;
+  --gold:#ffc65a; --gold-bg:#2c2412; --earth:#7aa7ff; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0b0c14; --sheet:#13141f; --ink:#e9eaf3; --soft:#aeb0c6; --faint:#6c6e86; --rule:#272939;
+  --gold:#ffc65a; --gold-bg:#2c2412; --earth:#7aa7ff; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--gold)}
+header p{color:var(--soft);margin:10px 0 0}
+.clock{font-family:var(--f-data);font-size:clamp(22px,4vw,30px);color:var(--gold);margin-top:14px;letter-spacing:.04em}
+.clock small{font-size:12px;color:var(--faint);display:block;letter-spacing:0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--earth)}
+code,.num{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--gold);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--gold);margin-bottom:2px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--gold-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--gold)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--gold);width:min(280px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;height:auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);font-weight:700}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.log{font-family:var(--f-data);font-size:13px;line-height:1.7;background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.log .t{color:var(--faint)}
+.log .done{color:var(--gold)}
+.log .wait{color:var(--faint)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が起きたか</a></li>
+    <li><a href="#s2">光の速さで距離を測る</a></li>
+    <li><a href="#s3">1 光日はどれくらいか</a></li>
+    <li><a href="#s4">返事が 2 日後に届く運用</a></li>
+    <li><a href="#s5">距離が縮む日がある</a></li>
+    <li><a href="#s6">電力と残りの時間</a></li>
+    <li><a href="#s7">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>ボイジャー 1 号と<em>1 光日</em></h1>
+  <p>1977 年に打ち上げられた探査機ボイジャー 1 号が、地球から光で 1 日かかる距離に届きました。人が作った物では初めてです。「光日」とは何か、その距離で探査機を動かすとはどういうことかを、前提知識なしで順番に説明します。</p>
+  <div class="clock" id="clock">24:00:00<small>地球からボイジャー 1 号まで、電波が片道で進むのにかかる時間</small></div>
+  <div class="meta">2026-11-19 版 ・ 読む時間の目安 12 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が起きたか</h2>
+  <ul>
+    <li>NASA によると、ボイジャー 1 号は 2026 年 11 月 18 日 午前 5 時 16 分（米国東部時間、日本時間では同日 19 時 16 分）に、地球から <strong>1 光日</strong>の距離に達しました。</li>
+    <li>電波も光と同じ速さで進むので、地球から送った指令が届くまで片道約 24 時間、返事を受け取るまで往復で約 48 時間かかります。</li>
+    <li>打ち上げは 1977 年 9 月 5 日。49 年かけて、ここまで来ました。</li>
+  </ul>
+  <div class="key"><b>KEY</b>「1 光日」は時間ではなく<strong>距離</strong>の単位です。光が 1 日かけて進む距離を表します。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>光の速さで距離を測る</h2>
+  <p>光は 1 秒に約 30 万 km 進みます（正確には 299,792.458 km）。宇宙の距離は km で書くと桁が大きすぎるので、「光がその距離を進むのに何秒かかるか」で表すことがあります。1 秒なら 1 光秒、1 分なら 1 光分、1 年なら 1 光年です。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 光の時間で並べる</b>
+    <canvas id="ladder" width="760" height="250" aria-label="月、太陽、海王星、ボイジャー 1 号、最も近い恒星までの光の時間"></canvas>
+    <div class="row"><label for="ld">目盛り</label><input type="range" id="ld" min="0" max="100" step="1" value="72"><output id="ld-o"></output></div>
+    <p class="note">目盛りは対数（1 目盛りごとに 10 倍）です。月までは約 1.3 秒、太陽までは約 8 分 20 秒。ボイジャー 1 号の 1 日は、太陽までの約 170 倍です。それでも、太陽に一番近い恒星（プロキシマ・ケンタウリ）までは約 4.2 年かかります。</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>1 光日はどれくらいか</h2>
+  <p>光の速さに 1 日の秒数を掛ければ出ます。</p>
+  <p class="eq">299,792.458 km/秒 × 86,400 秒 ＝ 約 259 億 km</p>
+  <div class="tbl"><table>
+    <tr><th>表し方</th><th class="n">値</th><th>メモ</th></tr>
+    <tr><td>km</td><td class="n">約 259 億 km</td><td>上の計算</td></tr>
+    <tr><td>マイル</td><td class="n">160 億マイル超</td><td>NASA の表現</td></tr>
+    <tr><td>天文単位（地球と太陽の距離）</td><td class="n">約 173</td><td>NASA は「約 170 倍」</td></tr>
+    <tr><td>冥王星までの距離と比べて</td><td class="n">4.5 倍強</td><td>NASA の表現</td></tr>
+  </table></div>
+  <p>ボイジャー 1 号は、NASA によると平均で 1 日に約 100 万マイル（約 160 万 km）進んでいます。秒速にすると約 18.6 km。新幹線の約 200 倍の速さで 49 年飛び続けて、ようやく光の 1 日分です。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>返事が 2 日後に届く運用</h2>
+  <p>地球から「この機器を止めて」と送っても、届くのは 24 時間後です。うまくいったかどうかが分かるのは、さらに 24 時間後。運用チームは、送った指令の結果を<strong>まる 2 日</strong>待つことになります。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 指令を送ってみる（時間を早回し）</b>
+    <div class="row">
+      <button class="chip" type="button" id="cmd">「ヒーターを 1 つ止める」を送る</button>
+      <label for="spd">早回し</label><input type="range" id="spd" min="600" max="20000" step="100" value="7200"><output id="spd-o"></output>
+    </div>
+    <canvas id="link" width="760" height="120" aria-label="地球とボイジャー 1 号の間を電波が進む様子"></canvas>
+    <div class="log" id="log" aria-live="polite"><span class="wait">ボタンを押すと、地球の時計で何が起きるかを記録します。</span></div>
+    <p class="note">時刻は送信からの経過時間です。指令の内容は説明のための例です。NASA によると、実際の運用ではヒーターなどを止めて電力をやりくりし、機器の寿命を延ばしてきました。</p>
+  </div>
+  <p>このため運用チームは、結果を 2 日待つ前提で、指令の順番や間隔を組み立てることになります。2026 年 10 月には約 48 時間連絡が取れなくなる出来事がありましたが、その後回復したと NASA は書いています。往復 48 時間の距離では、こうした事態の確認だけで何日もかかります。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>距離が縮む日がある</h2>
+  <p>ボイジャー 1 号は遠ざかり続けているのに、<strong>地球からの距離</strong>は 1 年のうち一時期だけ縮みます。地球が太陽の周りを秒速約 30 km で回っていて、ボイジャーの方向へ近づく季節があるからです。ボイジャーの秒速約 18.6 km より、地球が近づく速さの方が速い時期があります。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 1 年の間の地球からの距離（簡単な模型）</b>
+    <canvas id="orbit" width="760" height="280" aria-label="1 年間の地球とボイジャー 1 号の距離の変化"></canvas>
+    <div class="row"><label for="day">日付</label><input type="range" id="day" min="0" max="365" step="1" value="240"><output id="day-o"></output></div>
+    <div class="row"><span>地球からの距離の変化：<output id="dd"></output></span></div>
+    <p class="note">地球は円軌道、ボイジャーは一定の速さでまっすぐ遠ざかる、と単純にした模型です。ボイジャーの向きは黄道面（地球が回る面）から約 35° 上としています。正確な日付は再現していません。1 光日をいったん超えても、地球の位置によって一時的に 1 光日を下回る時期がある、ということが分かれば十分です。</p>
+  </div>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>電力と残りの時間</h2>
+  <ul>
+    <li>ボイジャーは、プルトニウムの熱を電気に変える発電機で動いています。太陽から遠すぎて、太陽電池は使えないからです。</li>
+    <li>発電量は年々減っています。運用チームはヒーターなどを止めて電力をやりくりし、今動いているのは、太陽とその外側の空間を調べるのに向いた少数の機器だけです。</li>
+    <li>電力が尽きる時期について、NASA は具体的な年を示していません。研究者は「いつか尽きるのは避けられないが、今はまだ限界から遠い」と話しています。</li>
+    <li>一緒に打ち上げられたボイジャー 2 号は、2035 年に 1 光日に届く見込みです。</li>
+  </ul>
+  <div class="key"><b>KEY</b>49 年前の機械を、返事が 2 日後に届く距離から、少しずつ電力を削りながら動かし続けている。今回の 1 光日は、その運用が続いていることの節目でもあります。</div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>用語集</h2>
+  <dl>
+    <dt>光日</dt><dd>光が 1 日で進む距離。約 259 億 km。</dd>
+    <dt>光年</dt><dd>光が 1 年で進む距離。約 9 兆 4600 億 km。</dd>
+    <dt>天文単位</dt><dd>地球と太陽の平均の距離。約 1 億 4960 万 km。</dd>
+    <dt>黄道面</dt><dd>地球が太陽の周りを回る面。</dd>
+    <dt>原子力電池</dt><dd>放射性物質が出す熱を電気に変える装置。ボイジャーはプルトニウムを使う。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>NASA：<a href="https://www.nasa.gov/podcasts/curious-universe/voyager-one-light-day/" target="_blank" rel="noopener">Voyager 1 reaches one light-day（NASA Curious Universe）</a></li>
+  </ul>
+</section>
+
+<footer>
+  <span>事実の出どころ：NASA の公開ページ（2026-11-19 確認）。km と天文単位の値は光の速さからの計算です。4 章と 5 章の「触って確かめる」は説明のための模型で、実際の軌道や運用の記録ではありません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// 2 章：光の時間のはしご（対数）
+const ITEMS = [
+  {n:'月', s:1.28}, {n:'太陽', s:499}, {n:'海王星', s:4.17*3600}, {n:'ボイジャー 1 号', s:86400, hi:true}, {n:'プロキシマ・ケンタウリ', s:4.24*365.25*86400},
+];
+const fmt = s => s < 60 ? s.toFixed(1) + ' 秒' : s < 3600 ? Math.round(s/60) + ' 分' : s < 86400*2 ? (s/3600).toFixed(1) + ' 時間' : s < 86400*365 ? (s/86400).toFixed(0) + ' 日' : (s/86400/365.25).toFixed(2) + ' 年';
+function ladder(){
+  const c = $('ladder'), g = c.getContext('2d'), W = c.width, H = c.height, L = 30, R = W - 30;
+  const span = 2 + +$('ld').value / 100 * 6; // 何桁を表示するか
+  const lo = 0, hi = lo + span; // log10 秒
+  $('ld-o').textContent = '10^' + span.toFixed(1) + ' 秒まで';
+  g.clearRect(0, 0, W, H);
+  const x = s => L + (Math.log10(s) - lo) / (hi - lo) * (R - L);
+  g.strokeStyle = css('--rule'); g.lineWidth = 1; g.fillStyle = css('--faint'); g.font = '11px sans-serif'; g.textAlign = 'center';
+  for (let k = Math.ceil(lo); k <= hi; k++) { const px = x(10 ** k); g.beginPath(); g.moveTo(px, 40); g.lineTo(px, H - 40); g.stroke(); g.fillText(fmt(10 ** k), px, H - 22); }
+  g.strokeStyle = css('--gold'); g.lineWidth = 2; g.beginPath(); g.moveTo(L, H / 2); g.lineTo(R, H / 2); g.stroke();
+  ITEMS.forEach((it, i) => {
+    const px = x(it.s); if (px > R + 2) return;
+    g.fillStyle = it.hi ? css('--gold') : css('--earth'); g.beginPath(); g.arc(px, H / 2, it.hi ? 8 : 5, 0, 7); g.fill();
+    g.fillStyle = css('--ink'); g.font = (it.hi ? 'bold ' : '') + '12.5px sans-serif';
+    const up = i % 2 === 0; g.textAlign = px > R - 60 ? 'right' : px < L + 60 ? 'left' : 'center';
+    g.fillText(it.n, px, up ? H / 2 - 22 : H / 2 + 30); g.fillStyle = css('--soft'); g.font = '11px sans-serif';
+    g.fillText(fmt(it.s), px, up ? H / 2 - 8 : H / 2 + 44);
+  });
+}
+$('ld').addEventListener('input', ladder); ladder();
+
+// 4 章：指令の往復
+let t0 = null, raf = null;
+const linkDraw = h => {
+  const c = $('link'), g = c.getContext('2d'), W = c.width, H = c.height, L = 50, R = W - 50;
+  g.clearRect(0, 0, W, H);
+  g.strokeStyle = css('--rule'); g.setLineDash([4, 4]); g.beginPath(); g.moveTo(L, H/2); g.lineTo(R, H/2); g.stroke(); g.setLineDash([]);
+  g.fillStyle = css('--earth'); g.beginPath(); g.arc(L, H/2, 12, 0, 7); g.fill();
+  g.fillStyle = css('--ink'); g.beginPath(); g.arc(R, H/2, 6, 0, 7); g.fill();
+  g.font = '12px sans-serif'; g.textAlign = 'center'; g.fillStyle = css('--soft');
+  g.fillText('地球', L, H - 12); g.fillText('ボイジャー 1 号', R - 10, H - 12);
+  if (h == null) return;
+  let px = null, lab = '';
+  if (h < 24) { px = L + (R - L) * h / 24; lab = '指令'; } else if (h < 48) { px = R - (R - L) * (h - 24) / 24; lab = '返事'; }
+  if (px != null) { g.fillStyle = css('--gold'); g.beginPath(); g.arc(px, H/2, 7, 0, 7); g.fill(); g.fillText(lab, px, H/2 - 14); }
+};
+const hm = h => { const t = Math.floor(h * 60); return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); };
+function logUpdate(h){
+  const ev = [[0, '地球から指令を送信'], [24, 'ボイジャー 1 号に指令が届き、ヒーターを止める（地球ではまだ誰も知らない）'], [48, '地球に返事が届く。ここで初めて成功が分かる']];
+  $('log').innerHTML = ev.map(([at, s]) => h >= at ? `<span class="done"><span class="t">+${hm(at)}</span>　${s}</span>` : `<span class="wait"><span class="t">+${hm(at)}</span>　（まだ）</span>`).join('') + `<span class="t">いまの経過時間 +${hm(Math.min(h, 48))}</span>`;
+}
+$('spd').addEventListener('input', () => { $('spd-o').textContent = '1 秒で ' + (+$('spd').value / 3600).toFixed(1) + ' 時間'; });
+$('spd-o').textContent = '1 秒で ' + (+$('spd').value / 3600).toFixed(1) + ' 時間';
+$('cmd').addEventListener('click', () => {
+  cancelAnimationFrame(raf); t0 = performance.now();
+  if (reduce) { linkDraw(48); logUpdate(48); return; }
+  const step = now => { const h = (now - t0) / 1000 * +$('spd').value / 3600; linkDraw(Math.min(h, 48.01)); logUpdate(h); if (h < 48) raf = requestAnimationFrame(step); };
+  raf = requestAnimationFrame(step);
+});
+linkDraw(null);
+
+// 5 章：1 年の距離（簡単な模型）
+const AU = 149597870.7, LD = 299792.458 * 86400, V = 18.6, VE = 29.78, BETA = 35 * Math.PI / 180;
+const dist = (d, lam0) => {
+  const r0 = LD * (1 - 0.0118); const t = d * 86400;
+  const ux = Math.cos(BETA), uz = Math.sin(BETA); // ボイジャーの向き（太陽から）
+  const r = r0 + V * t; const vx = r * ux, vz = r * uz;
+  const th = lam0 + 2 * Math.PI * d / 365.25; const ex = AU * Math.cos(th), ey = AU * Math.sin(th);
+  return Math.hypot(vx - ex, -ey, vz);
+};
+const LAM0 = 1.30; // 1 光日をまたぐ様子が見えるように選んだ開始位置
+function orbitDraw(){
+  const day = +$('day').value; $('day-o').textContent = day + ' 日目';
+  const c = $('orbit'), g = c.getContext('2d'), W = c.width, H = c.height, L = 70, R = W - 20, T = 20, B = H - 40;
+  const ds = []; for (let d = 0; d <= 365; d++) ds.push(dist(d, LAM0) / LD);
+  const mn = Math.min(...ds), mx = Math.max(...ds), pad = (mx - mn) * .1;
+  const x = d => L + d / 365 * (R - L), y = v => B - (v - mn + pad) / (mx - mn + 2 * pad) * (B - T);
+  g.clearRect(0, 0, W, H);
+  g.strokeStyle = css('--rule'); g.lineWidth = 1; g.fillStyle = css('--faint'); g.font = '11px sans-serif';
+  [mn, (mn + mx) / 2, mx].forEach(v => { g.beginPath(); g.moveTo(L, y(v)); g.lineTo(R, y(v)); g.stroke(); g.textAlign = 'right'; g.fillText(v.toFixed(4) + ' 光日', L - 6, y(v) + 4); });
+  g.textAlign = 'center'; [0, 91, 182, 273, 365].forEach(d => g.fillText(d + ' 日', x(d), B + 18));
+  if (mn < 1 && mx > 1) { g.strokeStyle = css('--gold'); g.setLineDash([5, 4]); g.beginPath(); g.moveTo(L, y(1)); g.lineTo(R, y(1)); g.stroke(); g.setLineDash([]); g.fillStyle = css('--gold'); g.textAlign = 'left'; g.fillText('1 光日', R - 50, y(1) - 6); }
+  g.strokeStyle = css('--ink'); g.lineWidth = 2; g.beginPath(); ds.forEach((v, d) => d ? g.lineTo(x(d), y(v)) : g.moveTo(x(d), y(v))); g.stroke();
+  for (let d = 1; d <= 365; d++) if (ds[d] < ds[d - 1]) { g.strokeStyle = css('--earth'); g.lineWidth = 4; g.beginPath(); g.moveTo(x(d - 1), y(ds[d - 1])); g.lineTo(x(d), y(ds[d])); g.stroke(); }
+  g.fillStyle = css('--gold'); g.beginPath(); g.arc(x(day), y(ds[day]), 6, 0, 7); g.fill();
+  const rate = (dist(day + 0.5, LAM0) - dist(day - 0.5, LAM0)) / 86400;
+  $('dd').textContent = (rate >= 0 ? '1 秒に ' + rate.toFixed(1) + ' km 遠ざかっている' : '1 秒に ' + (-rate).toFixed(1) + ' km 近づいている（青い区間）');
+}
+$('day').addEventListener('input', orbitDraw); orbitDraw();
+
+// 見出しの時計（飾り）：1 光日 = 24:00:00
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { ladder(); orbitDraw(); linkDraw(null); });
+</script>
+</body>
+</html>
