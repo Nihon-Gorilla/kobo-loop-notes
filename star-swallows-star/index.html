@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="アンドロメダ銀河で、超巨星が小さな星をのみ込んで合体する様子が初めて観測されました。共通外層とインスパイラルを前提知識なしで説明します。">
+<meta property="og:title" content="星が星をのみ込むしくみ">
+<meta property="og:description" content="超巨星が小さな星をのみ込む合体の観測（Nature 2026）を前提知識なしで説明します。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>星が星をのみ込むしくみ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。超巨星 = 赤橙、伴星 = 青白で全編通す */
+:root{
+  --paper:#f5f3f1; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#c2410c; --giant-bg:#fbeee6; --comp:#2b6cb0; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#8fc0ff; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#8fc0ff; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が見つかったか</a></li>
+    <li><a href="#s2">2 つの星の大きさ</a></li>
+    <li><a href="#s3">共通外層とは</a></li>
+    <li><a href="#s4">ガスがブレーキになる</a></li>
+    <li><a href="#s5">どうやって見つけたか</a></li>
+    <li><a href="#s6">なぜ大事か、何がまだか</a></li>
+    <li><a href="#s7">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>星が星を<em>のみ込む</em>しくみ</h1>
+  <p>アンドロメダ銀河で、太陽より少し軽い星が、ふくらんだ巨大な星の中に落ちていき、合体する様子が初めて観測されました。2026 年 11 月に Nature に載った研究を、前提知識なしで順番に説明します。</p>
+  <div class="meta">2026-11-20 版 ・ 読む時間の目安 12 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が見つかったか</h2>
+  <ul>
+    <li>米コロンビア大学の Viraj Karambelkar さんらのチームが、アンドロメダ銀河の連星（2 つの星が回り合う組）を調べ、小さい方の星が大きい方の星に<strong>のみ込まれて合体した</strong>と報告しました。</li>
+    <li>合体後の星には「Bao（バオ）」という愛称が付きました。正式な名前は <code>AT 2025abao</code> です。</li>
+    <li>2023 年に異変に気づき、見守り続けたところ、2025 年 10 月に大きく増光。その 47 日後にジェイムズ・ウェッブ宇宙望遠鏡が観測しました。研究者は「この種の現象で、これまでで最も早い追観測」と話しています。</li>
+  </ul>
+  <div class="key"><b>KEY</b>星の合体は前もって予測しにくく、起きている最中を捉えるのはとても難しい。今回は「落ちていく途中」から「合体の爆発」までを追えたことが新しい点です。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>2 つの星の大きさ</h2>
+  <p>研究チームのモデルによると、2 つの星は次のような星でした。</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>Big Bao（大きい方）</th><th>Little Bao（小さい方）</th></tr>
+    <tr><td>質量（太陽 = 1）</td><td class="n">約 7</td><td class="n">約 0.7</td></tr>
+    <tr><td>半径（太陽 = 1）</td><td class="n">約 350</td><td>記載なし（太陽程度の星）</td></tr>
+    <tr><td>明るさ（太陽 = 1）</td><td class="n">約 18,000</td><td>記載なし</td></tr>
+  </table></div>
+  <p>半径が太陽の 350 倍というのは、計算すると約 2.4 億 km、地球と太陽の距離（約 1.5 億 km）の約 1.6 倍です。もし太陽の位置に Big Bao を置いたら、<strong>地球の軌道はまるごと星の中</strong>に入ってしまいます。このように年をとって大きくふくらんだ星を<strong>超巨星</strong>と呼びます。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>共通外層とは</h2>
+  <p>連星のうち重い方の星が年をとってふくらむと、外側のガスの層が、近くを回る相手の星まで届いてしまうことがあります。すると相手の星は、大きい星の<strong>ガスの中</strong>を回ることになります。2 つの星が 1 つのガスの層に一緒に包まれた状態なので、これを<strong>共通外層</strong>と呼びます。</p>
+  <p>共通外層は、星の一生の教科書に載っている考え方ですが、起きている最中を実際に観測した例はほとんどありませんでした。今回の観測は、その途中の段階を捉えたものです。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>ガスがブレーキになる</h2>
+  <p>ガスの中を進む星は、空気の中を進むボールと同じように抵抗を受けます。抵抗で動きのエネルギーを奪われると、星は今の軌道を保てず、少しずつ内側へ落ちていきます。落ちるほどガスは濃くなり、ブレーキはさらに強くなります。こうして渦を巻くように中心へ近づくことを<strong>インスパイラル</strong>と呼びます。</p>
+  <div class="lab">
+    <b>触って確かめる ・ ガスのブレーキで渦を巻いて落ちる（模型）</b>
+    <canvas id="sp" width="520" height="520" aria-label="大きい星の中を、小さい星が渦を巻いて中心へ落ちていく様子"></canvas>
+    <div class="row"><label for="dr">ガスのブレーキの強さ</label><input type="range" id="dr" min="1" max="100" step="1" value="80"><output id="dr-o"></output></div>
+    <div class="row"><button class="chip" type="button" id="go">もう一度落とす</button></div>
+    <div class="readout"><span>中心に届くまでの周回数 <b id="orb">—</b></span></div>
+    <p class="note">ブレーキの強さと、内側ほどガスが濃くなる様子を単純な式で置いた模型です。実際の星の物理や今回の観測データは再現していません。ブレーキが弱いと何十周、何百周と回り、強いと数周で中心に届く、という関係だけを見るためのものです。</p>
+  </div>
+  <p>今回の Bao では、のみ込まれてから合体するまでが<strong>わずか 7 周、約 7 年</strong>でした。研究チームによると、もっと小さい星どうしの合体は、ふつう数千周かかるとされています。7 周は、かなり強いブレーキがかかっていたことを意味します。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>どうやって見つけたか</h2>
+  <ul>
+    <li><strong>2023 年</strong>：NASA の赤外線観測衛星 NEOWISE のデータで、この星の様子がおかしいことに気づく。研究者は「何か変わったことが起きていると気づき、どうなるか見守り続けた」と話しています。</li>
+    <li><strong>2025 年 10 月</strong>：大きな爆発的増光。合体のときに外へ吹き飛ばされたガスは、太陽の 0.1〜0.2 倍の質量と見積もられています。</li>
+    <li><strong>増光のピークから 47 日後</strong>：ジェイムズ・ウェッブ宇宙望遠鏡で観測。</li>
+  </ul>
+  <p>アンドロメダ銀河は地球から約 250 万光年離れているので、私たちが今見ているのは約 250 万年前に起きたことです。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>なぜ大事か、何がまだか</h2>
+  <h3>なぜ大事か</h3>
+  <ul>
+    <li>共通外層は、連星がその後どうなるかを決める分かれ道と考えられています。外層をうまく吹き飛ばせれば、2 つの星はぐっと近い距離で回る連星として生き残り、合体すれば 1 つの星になります。</li>
+    <li>研究チームは、今回の観測から「これまでの標準的なモデルでは、共通外層の中でエネルギーがどう配り直されるかを捉えきれていないかもしれない」と述べています。</li>
+    <li>研究者は「似た発見がこれから一気に増えるだろう」とも話しています。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>研究チームは「2 つの星が合体したと結論づけるには、今後の観測が必要」としています。「合体した」はまだ確定ではありません。合体した星が衝突で「若返る」可能性も、可能性として書かれている段階です。</div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>用語集</h2>
+  <dl>
+    <dt>連星</dt><dd>2 つの星が互いの周りを回っている組。</dd>
+    <dt>超巨星</dt><dd>重い星が年をとって大きくふくらんだもの。</dd>
+    <dt>共通外層</dt><dd>2 つの星が、1 つのガスの層に一緒に包まれた状態。</dd>
+    <dt>インスパイラル</dt><dd>抵抗などでエネルギーを失い、渦を巻くように内側へ落ちていくこと。</dd>
+    <dt>太陽質量・太陽半径</dt><dd>太陽の重さ・大きさを 1 として星を測る単位。</dd>
+    <dt>光年</dt><dd>光が 1 年で進む距離。約 9 兆 4600 億 km。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>論文：Karambelkar ほか「An inspiral of a star inside a common envelope with its giant companion」<a href="https://www.nature.com/articles/s41586-026-11221-z" target="_blank" rel="noopener">Nature（2026）</a></li>
+    <li>解説記事：<a href="https://www.sci.news/astronomy/webb-star-merger-andromeda-galaxy-15207.html" target="_blank" rel="noopener">Sci.News「Webb Catches Giant Star Swallowing Its Smaller Companion in Andromeda Galaxy」</a></li>
+  </ul>
+</section>
+
+<footer>
+  <span>事実の出どころ：Nature 論文を紹介した Sci.News の記事（2026-11-18 公開、2026-11-20 確認）。論文本文はこのページの作成時に読めなかったため、数字は記事に書かれた値だけを使っています。地球の軌道との比較と地球からの距離は、一般的な値をもとにした計算です。4 章の「触って確かめる」は説明のための模型です。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let raf = null;
+// 模型：r' = -k * rho(r) * r,  rho(r) = (1 - r)^1.5 + 0.05、角速度 ∝ r^-1.5
+function simulate(k){
+  const pts = []; let r = 1, th = 0, orbits = 0, dt = 0.002;
+  while (r > 0.05 && orbits < 400) {
+    const w = 2 * Math.PI * Math.pow(r, -1.5);
+    const rho = Math.pow(1 - r + 0.02, 1.5) + 0.02;
+    r -= k * rho * r * dt; th += w * dt; orbits = th / (2 * Math.PI);
+    pts.push([r, th]);
+  }
+  return {pts, orbits};
+}
+function run(){
+  cancelAnimationFrame(raf);
+  const v = +$('dr').value, k = 0.05 * Math.pow(10, v / 35);
+  $('dr-o').textContent = v < 34 ? '弱い' : v < 67 ? '中くらい' : '強い';
+  const {pts, orbits} = simulate(k);
+  $('orb').textContent = orbits >= 400 ? '400 周以上' : '約 ' + Math.max(1, Math.round(orbits)) + ' 周';
+  const c = $('sp'), g = c.getContext('2d'), W = c.width, C = W / 2, R = W * 0.44;
+  const frame = n => {
+    g.clearRect(0, 0, W, W);
+    const grd = g.createRadialGradient(C, C, 0, C, C, R);
+    grd.addColorStop(0, css('--giant')); grd.addColorStop(1, 'rgba(0,0,0,0)');
+    g.globalAlpha = .35; g.fillStyle = grd; g.beginPath(); g.arc(C, C, R, 0, 7); g.fill(); g.globalAlpha = 1;
+    g.strokeStyle = css('--giant'); g.globalAlpha = .5; g.setLineDash([4, 4]); g.beginPath(); g.arc(C, C, R, 0, 7); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+    g.fillStyle = css('--giant'); g.beginPath(); g.arc(C, C, 10, 0, 7); g.fill();
+    g.strokeStyle = css('--comp'); g.lineWidth = 1.2; g.beginPath();
+    const step = Math.max(1, Math.floor(pts.length / 4000));
+    for (let i = 0; i < n; i += step) { const [r, th] = pts[i]; const x = C + R * r * Math.cos(th), y = C - R * r * Math.sin(th); i ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke();
+    const [r, th] = pts[Math.min(n, pts.length - 1)];
+    g.fillStyle = css('--comp'); g.beginPath(); g.arc(C + R * r * Math.cos(th), C - R * r * Math.sin(th), 6, 0, 7); g.fill();
+    g.fillStyle = css('--soft'); g.font = '12px sans-serif'; g.textAlign = 'left';
+    g.fillText('大きい星のガスの層', 12, 20);
+  };
+  if (reduce) { frame(pts.length - 1); return; }
+  const per = Math.max(20, Math.ceil(pts.length / 240)); let n = 0;
+  const tick = () => { n = Math.min(pts.length - 1, n + per); frame(n); if (n < pts.length - 1) raf = requestAnimationFrame(tick); };
+  tick();
+}
+$('dr').addEventListener('input', run); $('go').addEventListener('click', run);
+run();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', run);
+</script>
+</body>
+</html>
