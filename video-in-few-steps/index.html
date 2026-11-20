@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="5 秒の動画を 3.8 秒で作る動画生成 AI「pi-H3」。拡散モデルのステップ、蒸留、VAE デコーダーの省略を前提知識なしで説明します。">
+<meta property="og:title" content="動画を数歩で描くしくみ">
+<meta property="og:description" content="再生より速く動画を作る pi-H3 のしくみを、触って確かめながら説明します。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>動画を数歩で描くしくみ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。元の道（曲がる）= 赤紫、蒸留後の道（まっすぐ）= 青緑で全編通す */
+:root{
+  --paper:#f4f3f5; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#9d2f7a; --giant-bg:#f6ecf3; --comp:#0f766e; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#f08ad0; --giant-bg:#2a1525; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#f08ad0; --giant-bg:#2a1525; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+.chip[aria-pressed="true"]{border-color:var(--giant);color:var(--giant)}
+.bars{display:flex;flex-direction:column;gap:10px;font-size:14px}
+.bar{display:grid;grid-template-columns:minmax(9em,13em) minmax(0,1fr);gap:4px 12px;align-items:center}
+@media (max-width:560px){.bar{grid-template-columns:minmax(0,1fr)}}
+.bar .track{position:relative;height:22px;background:var(--sheet);border:1px solid var(--rule);border-radius:2px}
+.bar .fill{position:absolute;inset:0 auto 0 0;background:var(--comp);border-radius:1px;transition:width .3s}
+.bar.play .fill{background:var(--faint)}
+.bar.ref .fill{background:var(--giant);opacity:.75}
+.bar .v{position:absolute;right:6px;top:0;line-height:22px;font-family:var(--f-data);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.playline{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--ink);opacity:.55}
+@media (prefers-reduced-motion: reduce){.bar .fill{transition:none}}
+</style>
+</head><body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が発表されたか</a></li>
+    <li><a href="#s2">ノイズから少しずつ磨く</a></li>
+    <li><a href="#s3">なぜ何歩も要るのか</a></li>
+    <li><a href="#s4">蒸留で歩数を減らす</a></li>
+    <li><a href="#s5">デコーダーを飛ばす</a></li>
+    <li><a href="#s6">再生より速いか比べる</a></li>
+    <li><a href="#s7">何がまだか</a></li>
+    <li><a href="#s8">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>動画を<em>数歩</em>で描くしくみ</h1>
+  <p>スタンフォード大学のチームが、5 秒の動画を 3.8 秒で作る、つまり<strong>再生する時間より短く</strong>作れる動画生成 AI「pi-H3」を発表しました。AI が動画を描く手順と、その手順をどうやって短くしたのかを、前提知識なしで順番に説明します。</p>
+  <div class="meta">2026-11-20 版 ・ 読む時間の目安 12 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が発表されたか</h2>
+  <ul>
+    <li>2026 年 11 月 10 日、スタンフォード大学の Hansheng Chen さんらが、研究ブログで「pi-H3」を発表しました。共同研究者には Luma AI に在籍していた研究者も含まれます。</li>
+    <li>pi-H3 は、MiniMax の動画生成モデル <strong>H3</strong> を速くした版です。動画を作る手順（ステップ）を <strong>2 回か 4 回</strong>に減らし、さらに最後の 1 回で、ふつうは別の部品が受け持つ「絵に戻す」作業まで済ませます。</li>
+    <li>チームの測定では、NVIDIA B200 という GPU 1 枚で、1344×768・毎秒 24 コマ・ステレオ音声つきの <strong>5.2 秒の動画を 3.81 秒</strong>で作りました（2 ステップの場合）。</li>
+  </ul>
+  <div class="key"><b>KEY</b>速くなった理由は 3 つです。手順の回数を減らしたこと、「絵に戻す」部品を使わなくしたこと、計算の数字を軽くしたこと（FP8 という形式）。この記事では前の 2 つを説明します。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>ノイズから少しずつ磨く</h2>
+  <p>いまの画像・動画生成 AI の多くは<strong>拡散モデル</strong>という仕組みで動いています。最初に用意するのは、テレビの砂嵐のようなでたらめな<strong>ノイズ</strong>です。AI はこれを見て「どちらへ直せば、もっともらしい絵に近づくか」を予想し、少しだけ直します。直した結果をまた見て、また少し直す。これを何回も繰り返して、最後に絵ができあがります。</p>
+  <p>この「見て、少し直す」1 回分を<strong>ステップ</strong>と呼びます。拡散モデルは一般に数十ステップを使うことが多く、1 ステップごとに大きな計算をするので、ステップの回数がそのまま待ち時間になります。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>なぜ何歩も要るのか</h2>
+  <p>ノイズから絵までの変化を、地図の上の「道」と考えてみます。AI が 1 ステップで分かるのは「今いる場所で、どちらへ進むか」という向きだけです。道が<strong>まっすぐ</strong>なら、その向きに一気に進んでもゴールに着きます。道が<strong>曲がっている</strong>と、大きく進むほど道からそれてしまうので、こまめに向きを確かめる、つまり何歩にも分けて進む必要があります。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 歩数と道の曲がり方（模型）</b>
+    <canvas id="fl" width="520" height="520" aria-label="中央のノイズの点が、外側の輪の形へ、決めた歩数で移動する様子"></canvas>
+    <div class="row" role="group" aria-label="道の種類">
+      <button class="chip" type="button" data-path="curve" aria-pressed="true">曲がった道（元のモデル）</button>
+      <button class="chip" type="button" data-path="straight" aria-pressed="false">まっすぐな道（蒸留後）</button>
+    </div>
+    <div class="row"><label for="st">歩数（ステップ）</label><input type="range" id="st" min="0" max="6" step="1" value="1"><output id="st-o"></output></div>
+    <div class="readout"><span>輪からのずれ（平均） <b id="err">—</b></span></div>
+    <p class="note">真ん中に散らばった点がノイズ、点線の輪が「作りたい絵」です。各点は決めた歩数で、毎回「今の向き」に進みます。細い線は本当の道、太い線と丸が実際に進んだ跡です。本物のモデルは高次元の空間で動き、どの点がどこへ行くかも決まっていません。ここでは「曲がった道は歩数が少ないとそれる」という関係だけを見るための模型です。</p>
+  </div>
+  <p>曲がった道で歩数を 1 や 2 にすると、点は輪から大きく外れます。歩数を増やすとずれは小さくなりますが、そのぶん計算が増えます。まっすぐな道なら、1 歩でも輪に届きます。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>蒸留で歩数を減らす</h2>
+  <p>そこで、時間をかけて何歩も進む元のモデルを<strong>先生</strong>にし、同じ仕上がりに数歩で届く<strong>生徒</strong>のモデルを学ばせます。これを<strong>蒸留</strong>と呼びます。生徒は、先生が何歩もかけて通る曲がった道を、なるべくまっすぐな近道として覚えます。</p>
+  <p>pi-H3 はこの蒸留に「<strong>pi-Flow v2</strong>」という方法を使っています。チームによると、学習用の動画データを使わずに先生から学ぶ方法（data-free）で、特に 2 ステップのときに画面の構造が崩れにくく、細かい質感も保ちやすいように改良したものです。道は「典型的にはまっすぐになる」と書かれています。くわしい中身は今後公開するとしています。</p>
+  <div class="key"><b>KEY</b>歩数を減らすだけなら簡単ですが、そのままでは 3 章の模型のように絵が崩れます。蒸留は「少ない歩数でも崩れない近道」を学ばせる技術です。</div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>デコーダーを飛ばす</h2>
+  <p>動画はとても大きなデータなので、多くの動画生成モデルは、動画をそのまま扱わず、<strong>小さく圧縮した形</strong>（潜在表現）の上で 2〜4 章の作業をします。最後に、圧縮した形を本物のピクセルに戻す専用の部品を通します。この部品を <strong>VAE デコーダー</strong>と呼びます。</p>
+  <p>H3 は圧縮がとても強く、ブログによると 1 つの単位（トークン）に、4 コマ分 × 縦 32 × 横 32 ピクセルの絵が詰まっています。そのぶん、戻す作業も重くなります。</p>
+  <p>pi-H3 は「<strong>DWD</strong>（Decoding Without a Decoder、デコーダーなしで戻す）」という工夫で、最後のステップだけ、ノイズを直す本体にそのまま<strong>ピクセルを直接出させ</strong>ます。別の部品を通さないので、その分の時間がかかりません。</p>
+  <p>NVIDIA H100 で 5 秒・768p の動画を作ったときの内訳（チームの測定）です。</p>
+  <div class="tbl"><table>
+    <tr><th>方法</th><th>VAE デコーダーの時間</th><th>合計</th></tr>
+    <tr><td>pi-H3（2 ステップ、DWD）</td><td>使わない</td><td class="n">6.19 秒</td></tr>
+    <tr><td>PDMD（2 ステップ）＋ H3 の VAE</td><td class="n">3.97 秒</td><td class="n">9.87 秒</td></tr>
+  </table></div>
+  <p>同じ 2 ステップでも、デコーダーにかかっていた約 4 秒がなくなっています。ただし PDMD は別チームの高速化版で、本体の部分も pi-H3 とは違うため、差のすべてがデコーダーの有無によるものではありません。なお pi-H3 の最後の 1 歩は、ピクセルまで出すぶん、ふつうの 1 歩より少し重いと書かれています。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>再生より速いか比べる</h2>
+  <p>作る時間が、できた動画を再生する時間より短ければ、理屈の上では「作りながら流す」ことに近づけます。チームが示した数字で比べてみましょう。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 作る時間と再生時間</b>
+    <div class="row" role="group" aria-label="動画の長さ">
+      <button class="chip" type="button" data-len="5" aria-pressed="true">約 5 秒の動画</button>
+      <button class="chip" type="button" data-len="10" aria-pressed="false">約 10 秒</button>
+      <button class="chip" type="button" data-len="15" aria-pressed="false">約 15 秒</button>
+    </div>
+    <div class="bars" id="bars"></div>
+    <div class="readout"><span id="verdict">—</span></div>
+    <p class="note">点線は再生時間です。pi-H3 は B200 1 枚での測定（7 回の中央値。モデルの読み込みや動画ファイルへの書き出しは含まない）。Sol-H3 は別チームの 4 ステップ版で、論文に載った GB200 1 枚での値をそのまま引用しています。GPU が違うので、厳密な比較ではありません。数字はいずれも pi-H3 の研究ブログの表から取りました。</p>
+  </div>
+  <p>2 ステップなら、5 秒と 10 秒の動画は再生より速く作れます。15 秒になると 18.58 秒かかり、再生時間を上回ります。長い動画ほど一度に扱うデータが増え、1 ステップの計算が重くなるためです。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>何がまだか</h2>
+  <ul>
+    <li><strong>DWD はまだ実験段階</strong>です。H3 の強い圧縮に合わせた調整は、計算資源が足りず最適化しきれていない、とチーム自身が書いています。</li>
+    <li><strong>画質は数値では比べていません。</strong>同じ指示文・同じノイズから作った動画を並べて見せる比較で、チームは「良い結果だけを選んでいない」としています。4 ステップは他の 4〜8 ステップ版より全体の質が高く、2 ステップは「単純な場面なら十分」という評価です。</li>
+    <li><strong>モデルの重みとコードはこれから</strong>です。デモは Hugging Face で公開中で、重みと推論コードは 11 月 16〜22 日に公開予定、学習コードは 11 月後半と書かれています（2026-11-20 時点、公開されたかは未確認）。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>速さの数字は、研究チームが自分たちの環境で測ったものです。読み込みや書き出しの時間は含まれていないので、実際にアプリで使ったときの待ち時間はもっと長くなります。</div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">8</span>用語集</h2>
+  <dl>
+    <dt>拡散モデル</dt><dd>ノイズから始めて、少しずつ直しながら絵や動画を作る AI の仕組み。</dd>
+    <dt>ステップ</dt><dd>「今の状態を見て、少し直す」1 回分。回数が多いほど時間がかかる。</dd>
+    <dt>蒸留</dt><dd>大きい・遅いモデル（先生）のふるまいを、速いモデル（生徒）に学ばせること。</dd>
+    <dt>潜在表現</dt><dd>大きなデータを、AI が扱いやすいよう小さく圧縮した形。</dd>
+    <dt>VAE デコーダー</dt><dd>潜在表現を、本物のピクセルの絵に戻す部品。</dd>
+    <dt>トークン</dt><dd>AI がまとめて扱うデータの 1 単位。</dd>
+    <dt>FP8</dt><dd>数字を 8 ビットで表す軽い形式。計算が速くなるが細かさは減る。</dd>
+    <dt>GPU</dt><dd>大量の計算を並べて同時にこなす半導体。B200・GB200・H100 は NVIDIA の製品名。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>研究ブログ：Hansheng Chen ほか「<a href="https://hanshengchen.com/blog/pi-h3/" target="_blank" rel="noopener">pi-H3: Video Generation in 2–4 Steps Without a VAE Decoder</a>」（2026-11-10）</li>
+    <li>デモ：<a href="https://huggingface.co/spaces/Lakonik/pi-H3" target="_blank" rel="noopener">Hugging Face Space「Lakonik/pi-H3」</a></li>
+  </ul>
+</section>
+
+<footer>
+  <span>事実の出どころ：pi-H3 の研究ブログ（2026-11-10 公開、2026-11-20 確認）。2 章の「拡散モデルは一般に数十ステップを使う」は一般的な説明で、H3 の元の歩数はブログに書かれていません。3 章の「触って確かめる」は説明のための模型です。動画や図はブログから転載していません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+// ---- 3 章：歩数と道の曲がり方（模型）----
+// 本当の道 p(t) = (1-t)z + t x + b sin(πt) R90(x-z)。各歩で「今の時刻の向き」v(t) に Δt だけ進む（オイラー法）。
+const STEPS = [1, 2, 4, 8, 16, 32, 50];
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
+const RING = 0.72, PTS = [];
+for (let i = 0; i < 260; i++) {
+  const z = [gauss() * 0.22, gauss() * 0.22];
+  const a = Math.atan2(z[1], z[0]) + (rnd() - 0.5) * 0.6;
+  PTS.push({z, x: [RING * Math.cos(a), RING * Math.sin(a)]});
+}
+let mode = 'curve';
+function walk(p, n, b){
+  const d = [p.x[0] - p.z[0], p.x[1] - p.z[1]], r = [-d[1], d[0]];
+  const out = [p.z.slice()]; let q = p.z.slice(); const dt = 1 / n;
+  for (let k = 0; k < n; k++) {
+    const c = b * Math.PI * Math.cos(Math.PI * k * dt);
+    q = [q[0] + dt * (d[0] + c * r[0]), q[1] + dt * (d[1] + c * r[1])]; out.push(q);
+  }
+  return out;
+}
+function truePath(p, b){
+  const d = [p.x[0] - p.z[0], p.x[1] - p.z[1]], r = [-d[1], d[0]], o = [];
+  for (let i = 0; i <= 40; i++) { const t = i / 40, s = b * Math.sin(Math.PI * t); o.push([p.z[0] + t * d[0] + s * r[0], p.z[1] + t * d[1] + s * r[1]]); }
+  return o;
+}
+function drawFlow(){
+  const n = STEPS[+$('st').value], b = mode === 'curve' ? 0.32 : 0;
+  $('st-o').textContent = n + ' 歩';
+  const c = $('fl'), g = c.getContext('2d'), W = c.width, S = W / 2.1, C = W / 2;
+  const X = v => C + v[0] * S, Y = v => C - v[1] * S;
+  g.clearRect(0, 0, W, W);
+  g.strokeStyle = css('--soft'); g.globalAlpha = .6; g.setLineDash([5, 5]); g.lineWidth = 1.5;
+  g.beginPath(); g.arc(C, C, RING * S, 0, 7); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+  const col = mode === 'curve' ? css('--giant') : css('--comp');
+  let err = 0;
+  PTS.forEach((p, i) => {
+    const w = walk(p, n, b), e = w[w.length - 1];
+    err += Math.abs(Math.hypot(e[0], e[1]) - RING);
+    g.fillStyle = css('--faint'); g.globalAlpha = .5; g.fillRect(X(p.z) - 1, Y(p.z) - 1, 2, 2); g.globalAlpha = 1;
+    g.fillStyle = col; g.beginPath(); g.arc(X(e), Y(e), 2.2, 0, 7); g.fill();
+    if (i % 43 === 0) {
+      g.strokeStyle = css('--soft'); g.lineWidth = 1; g.globalAlpha = .55; g.beginPath();
+      truePath(p, b).forEach((v, j) => j ? g.lineTo(X(v), Y(v)) : g.moveTo(X(v), Y(v))); g.stroke(); g.globalAlpha = 1;
+      g.strokeStyle = col; g.lineWidth = 2.2; g.beginPath();
+      w.forEach((v, j) => j ? g.lineTo(X(v), Y(v)) : g.moveTo(X(v), Y(v))); g.stroke();
+      g.fillStyle = col; w.forEach(v => { g.beginPath(); g.arc(X(v), Y(v), 3.5, 0, 7); g.fill(); });
+    }
+  });
+  g.fillStyle = css('--soft'); g.font = '12px sans-serif'; g.fillText('点線の輪 = 作りたい絵', 12, 20);
+  const m = err / PTS.length / RING * 100;
+  $('err').textContent = m < 0.5 ? 'ほぼ 0%' : '輪の半径の約 ' + m.toFixed(m < 10 ? 1 : 0) + '%';
+}
+document.querySelectorAll('[data-path]').forEach(bt => bt.addEventListener('click', () => {
+  mode = bt.dataset.path;
+  document.querySelectorAll('[data-path]').forEach(o => o.setAttribute('aria-pressed', o === bt));
+  drawFlow();
+}));
+$('st').addEventListener('input', drawFlow);
+drawFlow();
+// ---- 6 章：作る時間と再生時間（pi-H3 研究ブログの表の値）----
+const DATA = {
+  5:  {play: 5.2,  rows: [['pi-H3 2 ステップ', 3.81, ''], ['pi-H3 4 ステップ', 7.30, ''], ['Sol-H3 4 ステップ（GB200）', 9.48, 'ref']]},
+  10: {play: 10.1, rows: [['pi-H3 2 ステップ', 9.16, ''], ['pi-H3 4 ステップ', 17.56, ''], ['Sol-H3 4 ステップ（GB200）', 24.31, 'ref']]},
+  15: {play: 15.1, rows: [['pi-H3 2 ステップ', 18.58, ''], ['pi-H3 4 ステップ', 36.41, ''], ['Sol-H3 4 ステップ（GB200）', 44.96, 'ref']]}
+};
+function drawBars(len){
+  const d = DATA[len], max = Math.max(d.play, ...d.rows.map(r => r[1])) * 1.28, pct = v => (v / max * 100).toFixed(1) + '%';
+  const rows = [['再生時間', d.play, 'play'], ...d.rows];
+  $('bars').innerHTML = rows.map(([name, v, cls]) =>
+    `<div class="bar ${cls}"><span>${name}</span><div class="track"><div class="fill" style="width:${pct(v)}"></div>` +
+    `<div class="playline" style="left:${pct(d.play)}"></div><span class="v">${v.toFixed(2)} 秒</span></div></div>`).join('');
+  const r2 = d.rows[0][1] / d.play;
+  $('verdict').textContent = r2 < 1
+    ? `2 ステップは再生時間の ${(r2 * 100).toFixed(0)}%：再生より速く作れる`
+    : `2 ステップは再生時間の ${(r2 * 100).toFixed(0)}%：再生より少し遅い`;
+}
+document.querySelectorAll('[data-len]').forEach(bt => bt.addEventListener('click', () => {
+  document.querySelectorAll('[data-len]').forEach(o => o.setAttribute('aria-pressed', o === bt));
+  drawBars(+bt.dataset.len);
+}));
+drawBars(5);
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', drawFlow);
+</script>
+</body></html>
