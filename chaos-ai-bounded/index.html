@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="カオスを学ぶ AI が長く走らせると暴走する問題に、MIT が射影層という歯止めで「必ず有限に収まる」保証を付けました。ローレンツ方程式の模型で確かめます。">
+<meta property="og:title" content="暴走しないカオス AI">
+<meta property="og:description" content="歯止めなし・上限で切る・射影層の 3 つを、ローレンツ方程式の模型で比べます（MIT、PNAS 2026）。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>暴走しないカオスAI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。本物・歯止めあり = 青緑（--comp）、暴走・歯止めなし = 朱（--giant）で全編通す。動きは Corporate：easing (0.2,0,0,1)、150/280/450ms */
+:root{
+  --paper:#f4f4f2; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#c2410c; --giant-bg:#fbeee6; --comp:#0f766e; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+/* 日本語組版（jp-design）：禁則、約物詰め、和欧間、見出しの文節改行 */
+:root{--ease:cubic-bezier(.2,0,0,1);--t-quick:150ms;--t-std:280ms;--t-slow:450ms}
+main{line-break:strict;overflow-wrap:anywhere;font-feature-settings:"palt" 1;line-height:1.85}
+main code,main table,.eq,.lab output,.readout b{font-feature-settings:normal}
+@supports (text-autospace:normal){main{text-autospace:normal}}
+@supports (text-spacing-trim:normal){main{text-spacing-trim:normal}}
+@supports (word-break:auto-phrase){h1,h2,h3{word-break:auto-phrase}}
+em{font-style:normal}
+.chip{transition:border-color var(--t-quick) var(--ease),color var(--t-quick) var(--ease),transform var(--t-quick) var(--ease)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+/* ui-review で直した点：押しやすさ（44px）、小さい文字のコントラスト */
+.chip{min-height:44px}
+.meta,nav.toc b{color:var(--soft)}
+.lab input[type=range]{min-height:32px}
+.lab canvas{max-width:560px}
+.meter{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.meter .track{position:relative;height:12px;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.meter .fill{height:100%;transition:width var(--t-quick) linear}
+.meter .lim{position:absolute;top:-2px;bottom:-2px;border-left:2px dashed var(--ink);opacity:.6}
+.meter b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-weight:600;min-width:6em;text-align:right}
+.status{font-weight:700}
+.status.bad{color:var(--bad)} .status.ok{color:var(--comp)}
+</style>
+</head><body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が発表されたか</a></li>
+    <li><a href="#s2">カオスとは</a></li>
+    <li><a href="#s3">学習したモデルが暴走する</a></li>
+    <li><a href="#s4">歯止めのかけ方</a></li>
+    <li><a href="#s5">保証されたこと</a></li>
+    <li><a href="#s6">これから</a></li>
+    <li><a href="#s7">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1><em>暴走しない</em>カオス AI</h1>
+  <p>天気や乱流のように「少しの違いが大きな違いになる」動きを AI に学ばせると、長く走らせるうちに、ありえない値へ飛んでいってしまうことがあります。MIT のチームが、その暴走を必ず止める仕組みを作り、2026 年 11 月に PNAS に発表しました。何が起きていて、どう止めるのかを、前提知識なしで順番に説明します。</p>
+  <div class="meta">2026-11-22 版 ・ 読む時間の目安 10 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が発表されたか</h2>
+  <ul>
+    <li>MIT の情報・意思決定システム研究所（<span lang="en">LIDS</span>）の Sunbochen Tang さん、Navid Azizan さん、Themistoklis Sapsis さんのチームが、論文「<span lang="en">Learning dissipative chaotic dynamics with boundedness guarantees</span>」を PNAS に発表しました。</li>
+    <li>カオスな動きを学ぶ AI に、<strong>エネルギーのような量</strong>とその<strong>境界</strong>を一緒に学ばせ、境界の外ではその量が必ず減るように予測を直す部品（<strong>射影層</strong>）を入れました。</li>
+    <li>こうすると、どれだけ長く予測を続けても値が<strong>有限の範囲に収まる</strong>ことを、理論として保証できます。チームは「カオスを学ぶ機械学習モデルで、こうした保証を示した初めての研究」としています。</li>
+  </ul>
+  <div class="key"><b>KEY</b>保証されるのは「予測が暴走しないこと」です。「長い先まで予報が当たること」が保証されたわけではありません。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>カオスとは</h2>
+  <p>カオスとは、決まった規則で動いているのに、<strong>最初のわずかな違いがどんどん大きくなり</strong>、長い先が予測できなくなる動きのことです。気象学者ローレンツが 1963 年に見つけた、3 つの式だけでできた「ローレンツ方程式」が有名な例で、軌道を描くと蝶の羽のような形になります。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 100 万分の 1 の違いが広がる</b>
+    <canvas id="sens" width="520" height="260" aria-label="ほとんど同じ所から出発した 2 本の軌道の、ずれの大きさが時間とともに増える様子"></canvas>
+    <div class="row"><button class="chip" type="button" id="sens-go">もう一度</button></div>
+    <p class="note">ローレンツ方程式（σ=10、ρ=28、β=8/3）で、出発点を 100 万分の 1 だけずらした 2 本の軌道の距離を、縦軸を対数にして描いています。ずれはおよそ一定の割合で増え続け、やがて蝶の羽の大きさと同じくらいまで広がります。</p>
+  </div>
+  <p>大切なのは、ずれは大きくなっても、軌道そのものは<strong>蝶の形の範囲から出ていかない</strong>ことです。本物のカオスは、予測できないけれど、暴走もしません。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>学習したモデルが暴走する</h2>
+  <p>天気や乱流のような複雑な動きを、データから AI に学ばせる研究が進んでいます。学んだモデルに「今の状態」を入れると「少し先の状態」が出てくるので、それをまた入れて…と繰り返せば、長い先まで予測できます。</p>
+  <p>ところが、Azizan さんによると「短い間はデータとよく合っていても、長く走らせると失敗することがある」。1 回ごとの小さな誤差が積み重なり、値が<strong>際限なく大きくなっていく</strong>のです。本物のカオスなら蝶の形に収まるはずなのに、モデルの中では、ありえない世界へ飛んでいってしまいます。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>歯止めのかけ方</h2>
+  <p>暴走を止める方法は、いくつか考えられます。</p>
+  <ul>
+    <li><strong>学習のときに罰を与える</strong>：暴走しそうな予測に罰点を付けて学ばせる方法。Tang さんによると、学習で見たことのない入力では守られる保証がなく、暴走する可能性が残ります。</li>
+    <li><strong>上限で切る</strong>：値に上限を決めて、超えたら切り捨てる方法。単純ですが、本当の複雑な動きまで押さえつけてしまうおそれがあります。</li>
+    <li><strong>射影層（今回の方法）</strong>：エネルギーのような量とその境界をデータから学び、境界の外ではその量が<strong>必ず減る向き</strong>に予測を直します。境界の内側の動きには手を出しません。</li>
+  </ul>
+  <div class="lab">
+    <b>触って確かめる ・ 3 つの歯止めを比べる（模型）</b>
+    <canvas id="lz" width="520" height="420" aria-label="ローレンツ方程式に誤差を加えた模型の軌道。歯止めの種類によって、暴走する、壁に張り付く、境界の内側に収まる、が変わる"></canvas>
+    <div class="row" role="group" aria-label="歯止めの種類">
+      <button class="chip" type="button" data-mode="none" aria-pressed="false">歯止めなし</button>
+      <button class="chip" type="button" data-mode="clip" aria-pressed="false">上限で切る</button>
+      <button class="chip" type="button" data-mode="proj" aria-pressed="true">射影層</button>
+    </div>
+    <div class="meter">
+      <span>エネルギー</span><div class="track"><div class="fill" id="vm" style="background:var(--comp)"></div><div class="lim" id="vl"></div></div><b id="vv">—</b>
+    </div>
+    <div class="readout"><span>時間 <b id="tt">0.0</b></span><span class="status" id="st">—</span></div>
+    <p class="note">本物のローレンツ方程式に、遠くへ行くほど外向きに強くなる誤差を足して「少しずれて学んだモデル」に見立てた模型です。点線の楕円がエネルギーの境界で、「上限で切る」は箱の壁（点線の四角）で値を切り捨てます。論文のモデルや数値を再現したものではありません。今回の研究では境界もデータから学びますが、ここでは決めた楕円を使っています。</p>
+  </div>
+  <p>歯止めなしでは、しばらく蝶の形をなぞったあと、外へ飛んでいきます。上限で切ると暴走はしませんが、軌道が壁に張り付き、本物とは違う形になります。射影層では、境界の外に出かけた時だけ内向きに引き戻され、蝶の形を保ったまま走り続けます。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>保証されたこと</h2>
+  <ul>
+    <li><strong>保証されたこと</strong>：Tang さんの言葉では「どれだけ長い予測の期間でも、モデルの予測が有限の範囲に収まる」ことの理論的な保証です。</li>
+    <li><strong>保証されていないこと</strong>：予測が本物と一致し続けること。カオスでは 2 章のとおりずれは必ず広がるので、これは原理的に難しい話です。MIT の記事は、試した系で「本物の結果とよく合った」と書いていますが、数値は載っていません。</li>
+    <li><strong>使いやすさ</strong>：射影層は特定の AI の形に依存しない部品で、いろいろなニューラルネットワークに後付けできる、と Azizan さんは話しています。コードも公開されています。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>「AI で天気が長期まで当たるようになった」という話ではありません。暴走という AI 側の欠点に、数学的な歯止めをかけた研究です。</div>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>これから</h2>
+  <p>チームは、本物の気象のデータから作ったモデルでどこまで使えるかを確かめようとしていて、さらに大きな系での試験も続ける予定です。同じチームのメンバーによる続きの研究は、今年の学会「<span lang="en">Learning for Dynamics and Control</span>」で最優秀論文賞を受けたと紹介されています。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>用語集</h2>
+  <dl>
+    <dt>カオス</dt><dd>決まった規則で動くのに、最初のわずかな違いが大きく広がり、長い先が予測できなくなる動き。</dd>
+    <dt>ローレンツ方程式</dt><dd>3 つの式でできたカオスの代表例。軌道が蝶の羽の形になる。</dd>
+    <dt>散逸</dt><dd>エネルギーが少しずつ失われること。散逸のある系では、動きがある範囲に落ち着く。</dd>
+    <dt>射影層</dt><dd>AI の出力を、決まりを満たす向きに直す部品。今回は「境界の外ではエネルギーが減る」を必ず守らせる。</dd>
+    <dt>ハード制約・ソフト制約</dt><dd>決まりを必ず守らせるのがハード、守るように促すだけなのがソフト。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>MIT News「<a href="https://news.mit.edu/new-approach-enables-physically-consistent-ai-models-chaotic-systems-1120" target="_blank" rel="noopener"><span lang="en">New approach enables physically consistent AI models of chaotic systems</span></a>」（2026-11-20）</li>
+    <li>論文：Tang ほか「<span lang="en">Learning dissipative chaotic dynamics with boundedness guarantees</span>」<a href="https://www.pnas.org/doi/10.1073/pnas.2533077123" target="_blank" rel="noopener">PNAS（2026）</a></li>
+  </ul>
+</section>
+
+<footer>
+  <span>事実の出どころ：MIT News の記事（2026-11-20 公開、2026-11-22 確認）。論文本文は読んでいません。ローレンツ方程式の説明と 2 章・4 章の「触って確かめる」は一般的な知識による模型で、論文の数値ではありません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const S = 10, R = 28, B = 8 / 3, C = R + S;
+const lor = p => [S * (p[1] - p[0]), p[0] * (R - p[2]) - p[1], p[0] * p[1] - B * p[2]];
+const rk4 = (F, p, dt) => { const a = F(p), b = F(p.map((q, i) => q + dt / 2 * a[i])), c = F(p.map((q, i) => q + dt / 2 * b[i])), d = F(p.map((q, i) => q + dt * c[i])); return p.map((q, i) => q + dt / 6 * (a[i] + 2 * b[i] + 2 * c[i] + d[i])); };
+// ---- 2 章：初期値鋭敏性 ----
+let sRaf;
+function sens(){
+  cancelAnimationFrame(sRaf);
+  const c = $('sens'), g = c.getContext('2d'), W = c.width, H = c.height, L = 60, T = 30, dt = 0.005;
+  let p = [1, 1, 25], q = [1 + 1e-6, 1, 25]; const pts = [];
+  for (let i = 0; i <= T / dt; i++) { if (i % 10 === 0) pts.push([i * dt, Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2])]); p = rk4(lor, p, dt); q = rk4(lor, q, dt); }
+  const X = t => L + (W - L - 12) * t / T, Y = d => 16 + (H - 50) * (1 - (Math.log10(Math.max(d, 1e-7)) + 7) / 9);
+  const frame = n => {
+    g.clearRect(0, 0, W, H); g.font = '18px sans-serif'; g.fillStyle = css('--soft'); g.strokeStyle = css('--rule'); g.lineWidth = 1;
+    [-6, -4, -2, 0, 2].forEach(e => { const y = Y(10 ** e); g.beginPath(); g.moveTo(L, y); g.lineTo(W - 10, y); g.stroke(); g.textAlign = 'right'; g.fillText({'-6':'10⁻⁶','-4':'10⁻⁴','-2':'10⁻²','0':'1','2':'100'}[e], L - 6, y + 6); });
+    g.textAlign = 'center'; [0, 10, 20, 30].forEach(t => g.fillText(t, X(t), H - 14));
+    g.textAlign = 'right'; g.fillText('時間 →', W - 12, H - 32);
+    g.strokeStyle = css('--giant'); g.lineWidth = 2.4; g.beginPath();
+    for (let i = 0; i < n; i++) { const [t, d] = pts[i]; i ? g.lineTo(X(t), Y(d)) : g.moveTo(X(t), Y(d)); } g.stroke();
+    g.textAlign = 'left'; g.fillStyle = css('--ink'); g.fillText('2 本の軌道のずれ', L + 8, 30);
+  };
+  if (reduce) return frame(pts.length);
+  let n = 0; const step = () => { n = Math.min(pts.length, n + 4); frame(n); if (n < pts.length) sRaf = requestAnimationFrame(step); };
+  step();
+}
+$('sens-go').addEventListener('click', sens);
+// ---- 4 章：3 つの歯止め ----
+const VC = 1800, EPS = 1.5;
+const V = p => p[0] ** 2 + p[1] ** 2 + (p[2] - C) ** 2;
+const model = p => { const k = EPS * (V(p) / 1000) ** 2, f = lor(p); return [f[0] + k * p[0], f[1] + k * p[1], f[2] + k * (p[2] - C)]; };
+const project = (p, d) => { const v = V(p); if (v <= VC) return d; const gr = [2 * p[0], 2 * p[1], 2 * (p[2] - C)], dv = gr[0] * d[0] + gr[1] * d[1] + gr[2] * d[2], a = 0.5 * v; if (dv <= -a) return d; const gg = gr[0] ** 2 + gr[1] ** 2 + gr[2] ** 2, l = (dv + a) / gg; return d.map((q, i) => q - l * gr[i]); };
+const BOX = [[-15, 15], [-20, 20], [6, 44]];
+let mode = 'proj', raf, path = [], p, t, dead;
+function reset(){ p = [1, 1, 25]; t = 0; dead = null; path = []; }
+function stepSim(){
+  const dt = 0.004;
+  for (let k = 0; k < 20 && !dead; k++) {
+    const F = mode === 'proj' ? q => project(q, model(q)) : model;
+    p = rk4(F, p, dt); t += dt;
+    if (mode === 'clip') p = p.map((q, i) => Math.max(BOX[i][0], Math.min(BOX[i][1], q)));
+    if (!isFinite(V(p)) || V(p) > 1e6) dead = t; else path.push([p[0], p[2]]);
+  }
+}
+function draw(){
+  const c = $('lz'), g = c.getContext('2d'), W = c.width, H = c.height;
+  const KX = 5.4, KZ = 4.3, X = x => W / 2 + x * KX, Z = z => H - 14 - (z + 6) * KZ;
+  g.clearRect(0, 0, W, H);
+  g.strokeStyle = css('--soft'); g.setLineDash([5, 5]); g.lineWidth = 1.4;
+  if (mode === 'clip') g.strokeRect(X(BOX[0][0]), Z(BOX[2][1]), X(BOX[0][1]) - X(BOX[0][0]), Z(BOX[2][0]) - Z(BOX[2][1]));
+  else { const r = Math.sqrt(VC); g.beginPath(); g.ellipse(X(0), Z(C), r * KX, r * KZ, 0, 0, 7); g.stroke(); }
+  g.setLineDash([]);
+  const col = dead ? css('--giant') : css('--comp');
+  g.strokeStyle = col; g.lineWidth = 1.3; g.globalAlpha = .85; g.beginPath();
+  const from = Math.max(0, path.length - 4000);
+  for (let i = from; i < path.length; i++) { const [x, z] = path[i]; i === from ? g.moveTo(X(x), Z(z)) : g.lineTo(X(x), Z(z)); }
+  g.stroke(); g.globalAlpha = 1;
+  if (path.length) { const [x, z] = path[path.length - 1]; g.fillStyle = col; g.beginPath(); g.arc(X(x), Z(z), 5, 0, 7); g.fill(); }
+  g.fillStyle = css('--soft'); g.font = '18px sans-serif'; g.textAlign = 'left';
+  g.fillText(mode === 'clip' ? '点線の四角 = 上限の箱' : '点線の楕円 = エネルギーの境界', 10, 22);
+  g.textAlign = 'right'; g.fillText('横 x ・ 縦 z', W - 10, 22);
+  if (dead) { g.fillStyle = css('--sheet'); g.globalAlpha = .9; g.fillRect(W / 2 - 150, 34, 300, 40); g.globalAlpha = 1; g.fillStyle = css('--bad'); g.font = '700 22px sans-serif'; g.textAlign = 'center'; g.fillText('値が際限なく大きくなった', W / 2, 62); }
+  const v = dead ? Infinity : V(p), max = 3000;
+  $('vm').style.width = Math.min(100, v / max * 100) + '%'; $('vm').style.background = v > VC ? css('--giant') : css('--comp');
+  $('vl').style.left = (VC / max * 100) + '%';
+  $('vv').textContent = dead ? '∞（暴走）' : Math.round(v).toLocaleString();
+  $('tt').textContent = (dead || t).toFixed(1);
+  const st = $('st');
+  if (dead) { st.textContent = `時間 ${dead.toFixed(1)} で暴走`; st.className = 'status bad'; }
+  else if (mode === 'clip' && path.length && p.some((q, i) => q === BOX[i][0] || q === BOX[i][1])) { st.textContent = '壁に張り付いている'; st.className = 'status bad'; }
+  else { st.textContent = '範囲の中で動いている'; st.className = 'status ok'; }
+}
+function loop(){ stepSim(); draw(); if (!dead && t < 60) raf = requestAnimationFrame(loop); }
+function start(m){
+  mode = m; cancelAnimationFrame(raf); reset();
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  if (reduce) { while (!dead && t < 40) stepSim(); draw(); } else loop();
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => start(b.dataset.mode)));
+let seen = false;
+new IntersectionObserver(es => { if (es[0].isIntersecting && !seen) { seen = true; start('proj'); } }).observe($('lz'));
+new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { sens(); o.disconnect(); } }).observe($('sens'));
+
+</script>
+</body></html>
