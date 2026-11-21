@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="超音波検査で塗るゼリーは何をしているのか。乾いたまま音を通すボトルブラシ素材（MIT、Science 2026）を、前提知識なしで説明します。">
+<meta property="og:title" content="ゼリーなしの超音波">
+<meta property="og:description" content="すき間が空気だと音は約100万分の1しか入らない。ゼリーの役目と、液体なしで音を通す新素材を触って確かめます。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ゼリーなしの超音波</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。音・透過 = 青緑（--comp）、反射・損失 = 朱（--giant）で全編通す。動きは Corporate：easing (0.2,0,0,1)、150/280/450ms */
+:root{
+  --paper:#f4f4f2; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#c2410c; --giant-bg:#fbeee6; --comp:#0f766e; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+/* 日本語組版（jp-design）：禁則、約物詰め、和欧間、見出しの文節改行 */
+:root{--ease:cubic-bezier(.2,0,0,1);--t-quick:150ms;--t-std:280ms;--t-slow:450ms}
+main{line-break:strict;overflow-wrap:anywhere;font-feature-settings:"palt" 1;line-height:1.85}
+main code,main table,.eq,.lab output,.readout b{font-feature-settings:normal}
+@supports (text-autospace:normal){main{text-autospace:normal}}
+@supports (text-spacing-trim:normal){main{text-spacing-trim:normal}}
+@supports (word-break:auto-phrase){h1,h2,h3{word-break:auto-phrase}}
+em{font-style:normal}
+.chip{transition:border-color var(--t-quick) var(--ease),color var(--t-quick) var(--ease),transform var(--t-quick) var(--ease)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+.lab canvas{max-width:560px}
+/* ui-review で直した点：押しやすさ（44px）、小さい文字のコントラスト */
+.chip{min-height:44px}
+.meta,nav.toc b{color:var(--soft)}
+.lab input[type=range]{min-height:32px}
+.bars{display:flex;flex-direction:column;gap:8px;font-size:14px}
+.bar{display:grid;grid-template-columns:minmax(8em,12em) minmax(0,1fr);gap:4px 12px;align-items:center}
+@media (max-width:560px){.bar{grid-template-columns:minmax(0,1fr)}}
+.bar .track{position:relative;height:24px;background:var(--sheet);border:1px solid var(--rule);border-radius:2px}
+.bar .fill{position:absolute;inset:0 auto 0 0;border-radius:1px;width:0;transition:width var(--t-slow) var(--ease)}
+.bar .v{position:absolute;top:0;line-height:24px;font-family:var(--f-data);font-size:12.5px;color:var(--ink);padding:0 6px;white-space:nowrap}
+.meter{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.meter .track{height:12px;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.meter .fill{height:100%;transition:width var(--t-std) var(--ease)}
+.meter b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-weight:600;min-width:4.5em;text-align:right}
+.mark{display:flex;flex-wrap:wrap;gap:6px}
+@media (prefers-reduced-motion: reduce){.bar .fill,.meter .fill,.chip{transition:none}}
+</style>
+</head><body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が発表されたか</a></li>
+    <li><a href="#s2">なぜゼリーを塗るのか</a></li>
+    <li><a href="#s3">水を使うと乾く</a></li>
+    <li><a href="#s4">ボトルブラシで滑らせる</a></li>
+    <li><a href="#s5">第 2 の網で強くする</a></li>
+    <li><a href="#s6">どこまで試したか</a></li>
+    <li><a href="#s7">まだのこと</a></li>
+    <li><a href="#s8">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>ゼリーなしの<em>超音波</em></h1>
+  <p>超音波検査では、肌に冷たいゼリーを塗ります。そのゼリーの代わりになる、乾いたままで音を通す素材を MIT などのチームが作り、2026 年 11 月に Science に発表しました。ゼリーが何をしているのか、どうすれば液体なしで同じことができるのかを、前提知識なしで順番に説明します。</p>
+  <div class="meta">2026-11-21 版 ・ 読む時間の目安 10 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が発表されたか</h2>
+  <ul>
+    <li>MIT の Xuanhe Zhao さんらのチームが、液体を含まないのに超音波をよく通す、ゴムのような素材を作りました。シンガポール国立大学、南洋理工大学、ウィスコンシン大学との共同研究です。</li>
+    <li>論文の題名は「<span lang="en">Interpenetrating Bottle-Brush Elastomer for Low-Loss Soft Ultrasonic Interfaces</span>」。<strong>ボトルブラシ</strong>という形の分子を使った<strong>エラストマー</strong>（ゴム状の素材）です。</li>
+    <li>肌に貼る小さな超音波装置にこの素材を使うと、運動中も体の中を撮り続けられたと報告しています。</li>
+  </ul>
+  <div class="key"><b>KEY</b>ゼリーの役目は「肌と装置のすき間を埋めること」。新しい素材は、水を使わずに分子の形の工夫でそれをこなします。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>なぜゼリーを塗るのか</h2>
+  <p>超音波装置の先（探触子）と肌の間には、目に見えない小さなすき間ができます。MIT の解説によると、ゼリーはこのすき間を埋めて、超音波を効率よく伝えるために塗ります。</p>
+  <p>すき間に空気が残ると困る理由は、物理の教科書で説明できます。音は、性質の違う 2 つの物の<strong>境目で跳ね返ります</strong>。その「性質」を表す数字が<strong>音響インピーダンス</strong>で、違いが大きいほどたくさん跳ね返ります。空気と体では、この数字が数千倍も違います。</p>
+  <div class="lab">
+    <b>触って確かめる ・ すき間に何があるか</b>
+    <canvas id="wv" width="520" height="240" aria-label="探触子から出た音が、すき間の層を通って体に入る様子。すき間の性質で、跳ね返る量が変わる"></canvas>
+    <div class="row" role="group" aria-label="すき間の中身">
+      <button class="chip" type="button" data-z="0.0004" aria-pressed="false">空気</button>
+      <button class="chip" type="button" data-z="1.48" aria-pressed="true">水（ゼリーはこれに近い）</button>
+    </div>
+    <div class="row"><label for="zl">すき間の音響インピーダンス</label><input type="range" id="zl" min="-3.5" max="0.6" step="0.01" value="0.17"><output id="zl-o"></output></div>
+    <div class="meter">
+      <span>体に入る音</span><div class="track"><div class="fill" id="m1" style="background:var(--comp)"></div></div><b id="m1v">—</b>
+      <span>往復して戻る音</span><div class="track"><div class="fill" id="m2" style="background:var(--comp)"></div></div><b id="m2v">—</b>
+    </div>
+    <p class="note">体（軟らかい組織）と探触子の表面を約 1.6 MRayl、空気を約 0.0004 MRayl、水を約 1.48 MRayl とした、物理の教科書どおりの計算です（境目で跳ね返る割合 =（差 ÷ 和）の 2 乗。何度も跳ね返る分は省いています）。新しい素材の値は記事に書かれていないので入れていません。画像を作るには、体の中で跳ね返った音が<strong>往復して</strong>探触子に戻る必要があります。</p>
+  </div>
+  <p>この計算では、すき間が空気だと体に入る音は約 100 万分の 1、往復して戻る音は約 1 兆分の 1 まで減ります。ゼリーで水に近いものを詰めると、ほとんどの音が通ります。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>水を使うと乾く</h2>
+  <p>病院の検査なら、そのつどゼリーを塗れば済みます。けれども、肌に貼りっぱなしにして体の中を見続ける<strong>貼る超音波装置</strong>では、そうはいきません。チームは以前、水が主成分のハイドロゲルですき間を埋める装置を作っていましたが、<strong>1〜2 日で乾いて</strong>音を通せなくなるのが課題でした。</p>
+  <p>Zhao さんは「貼る装置では、ゲルを使う設計は長く使うことの妨げになる」と話しています。そこで、液体も潤滑剤も足さずに、音を通しやすい素材を作ることにしました。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>ボトルブラシで滑らせる</h2>
+  <p>ゴムのような素材は、長いひも状の分子（高分子の鎖）がからみ合ってできています。超音波が通ると鎖が細かく揺れますが、鎖どうしがこすれ合うと、その<strong>摩擦</strong>で音のエネルギーが熱になって失われます。</p>
+  <p>チームが使ったのが<strong>ボトルブラシ</strong>形の分子です。1 本の主な鎖（主鎖）から、短い枝（側鎖）がブラシの毛のようにたくさん生えています。研究者の Shu Wang さんによると、この毛は他の分子の中に入り込みにくく、超音波の速さで揺れても動きやすいので、鎖どうしの摩擦が小さくなります。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 鎖の形と音の通り方（模型）</b>
+    <div class="row" role="group" aria-label="分子の形">
+      <button class="chip" type="button" data-mol="tangle" aria-pressed="false">からみ合う鎖</button>
+      <button class="chip" type="button" data-mol="brush" aria-pressed="true">ボトルブラシ</button>
+    </div>
+    <canvas id="ml" width="520" height="300" aria-label="分子の模式図と、素材の中を進む音の強さ"></canvas>
+    <p class="note">鎖の形と、素材の中を進むにつれて音が弱まる様子を、説明のために描いた模型です。弱まり方の数字は論文の値ではありません。「鎖どうしがこすれにくいほど、音が遠くまで届く」という関係だけを見るためのものです。</p>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>第 2 の網で強くする</h2>
+  <p>ただ、最初の試作品は「豆腐のように、とても柔らかくてもろい」ものでした。大きく作ると、自分の重さを支えられません。</p>
+  <p>そこでチームは、ゆるくつながった<strong>もう一つのボトルブラシの網</strong>を作り、最初の網と化学的に融合させました。第 2 の網が最初の網を固定し、それでも摩擦の小さい性質は保たれます。こうして、裂けずに何度も伸ばせる、丈夫なゴム状の素材になりました。論文の題名にある「<span lang="en">Interpenetrating</span>（互いに入り込んだ）」は、この 2 つの網のことです。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>どこまで試したか</h2>
+  <ul>
+    <li><strong>模型での連続撮影</strong>：人体をまねた模型（ファントム）に当て続けて、<strong>約 9 日間</strong>はっきりした画像が撮れました。</li>
+    <li><strong>ランニング</strong>：胸に貼ってトレッドミルで走る試験では、比べた普通のシリコーンゴムは 10 分の間に汗を吸って水浸しになりました。新しい素材は汗を外へ逃がしました。</li>
+    <li><strong>自転車</strong>：キーホルダーくらいの装置を首に貼った人が、急な坂を含む 30 分の自転車走行をする間、血流を撮り続けられました。</li>
+  </ul>
+  <div class="lab">
+    <b>触って確かめる ・ 音を通し続けられた日数</b>
+    <div class="bars" id="days"></div>
+    <div class="row"><button class="chip" type="button" id="replay">もう一度</button></div>
+    <p class="note">ハイドロゲルは「1〜2 日で乾く」という記述、新素材は模型での連続試験の値です。条件がそろった比較ではありません。新素材の約 9 日は模型での結果で、人が 9 日間貼り続けて運動したという意味ではありません。</p>
+  </div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>まだのこと</h2>
+  <ul>
+    <li><strong>作り方をもっと簡単にする</strong>：チームは今、この素材の製造工程を簡素にする作業をしています。</li>
+    <li><strong>どれだけ長持ちするか</strong>：Wang さんは「原理的にはずっと使えるかもしれないが、どれだけ安定かによる」と話していて、長期の安定性はこれからです。</li>
+    <li><strong>医療機器としてはまだ</strong>：材料の研究の段階で、病院で使える製品として承認されたものではありません。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>「病院でゼリーがいらなくなる」とすぐ言える段階ではありません。チームが目指しているのは、運動選手の体の状態を追ったり、病院の外で患者を見守ったりする、長く貼れる超音波装置です。</div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">8</span>用語集</h2>
+  <dl>
+    <dt>超音波検査</dt><dd>人に聞こえない高い音を体に当て、跳ね返ってきた音から体の中を画像にする検査。</dd>
+    <dt>探触子</dt><dd>超音波を出し、跳ね返った音を受け取る装置の先端部分。</dd>
+    <dt>音響インピーダンス</dt><dd>物の中での音の伝わりにくさを表す数字。違う物の境目で差が大きいほど、音は跳ね返る。単位は Rayl（レイル）。</dd>
+    <dt>ハイドロゲル</dt><dd>水を多く含んだゼリー状の素材。</dd>
+    <dt>エラストマー</dt><dd>ゴムのように伸び縮みする素材。</dd>
+    <dt>ボトルブラシ分子</dt><dd>主鎖から短い側鎖がブラシの毛のように多数生えた形の高分子。</dd>
+    <dt>ファントム</dt><dd>検査の試験に使う、人体の性質をまねた模型。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>MIT News「<a href="https://news.mit.edu/2026/ultrasound-imaging-without-gel-1119" target="_blank" rel="noopener"><span lang="en">Ultrasound imaging without the gel</span></a>」（2026-11-19）</li>
+    <li>論文：Wang ほか「<span lang="en">Interpenetrating Bottle-Brush Elastomer for Low-Loss Soft Ultrasonic Interfaces</span>」Science（2026）<span lang="en">doi:10.1126/science.aef9553</span></li>
+  </ul>
+</section>
+
+<footer>
+  <span>事実の出どころ：MIT News の解説記事（2026-11-19 公開、2026-11-21 確認）。論文本文は読んでいません。2 章の音響インピーダンスの説明と数値は、記事ではなく物理の一般的な値による計算です。4 章の「触って確かめる」は説明のための模型です。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// ---- 2 章：境目での反射（R =((Z2-Z1)/(Z2+Z1))^2、多重反射は無視）----
+const ZB = 1.6;
+let Zg = 1.48, T1 = 1, tick = 0;
+function oneOver(v){
+  if (v >= 0.001) return (v * 100).toFixed(v >= 0.1 ? 1 : 2) + '%';
+  const e = Math.round(-Math.log10(v)), u = e >= 12 ? ['兆', 12] : e >= 8 ? ['億', 8] : e >= 4 ? ['万', 4] : ['', 0];
+  return `約 ${10 ** (e - u[1])}${u[0]}分の 1`;
+}
+function setZ(z){
+  Zg = z; const R = ((z - ZB) / (z + ZB)) ** 2; T1 = (1 - R) ** 2; const T2 = T1 * T1;
+  $('zl').value = Math.log10(z).toFixed(2);
+  $('zl-o').textContent = (z < 0.01 ? z.toFixed(4) : z.toFixed(2)) + ' MRayl';
+  $('m1').style.width = (T1 * 100).toFixed(3) + '%'; $('m2').style.width = (T2 * 100).toFixed(3) + '%';
+  $('m1v').textContent = oneOver(T1); $('m2v').textContent = oneOver(T2);
+  document.querySelectorAll('[data-z]').forEach(b => b.setAttribute('aria-pressed', Math.abs(+b.dataset.z - z) / z < 0.02));
+  if (reduce) drawWave();
+}
+function drawWave(){
+  const c = $('wv'), g = c.getContext('2d'), W = c.width, H = c.height, x1 = 130, x2 = 210, mid = H / 2 + 6;
+  g.clearRect(0, 0, W, H);
+  g.fillStyle = css('--rule'); g.fillRect(0, 36, x1, H - 70);
+  const air = Zg < 0.1;
+  g.fillStyle = air ? css('--sheet') : css('--comp'); g.globalAlpha = air ? 1 : .18; g.fillRect(x1, 36, x2 - x1, H - 70); g.globalAlpha = 1;
+  g.strokeStyle = css('--soft'); g.setLineDash([4, 4]); g.strokeRect(x1, 36, x2 - x1, H - 70); g.setLineDash([]);
+  g.fillStyle = css('--giant-bg'); g.fillRect(x2, 36, W - x2, H - 70);
+  g.fillStyle = css('--soft'); g.font = '600 19px sans-serif'; g.textAlign = 'center';
+  g.fillText('探触子', x1 / 2, 26); g.fillText('すき間', (x1 + x2) / 2, 26); g.fillText('体', (x2 + W) / 2, 26);
+  const ph = reduce ? 0 : tick * 0.08, A = 34;
+  const wave = (xa, xb, amp, dir, col, w) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath();
+    for (let x = xa; x <= xb; x += 2) { const y = mid + amp * Math.sin((x * 0.12) - dir * ph); x === xa ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke(); };
+  wave(10, x1, A, 1, css('--comp'), 2.2);
+  const a1 = Math.sqrt(Math.sqrt(T1));
+  wave(x1, x2, A * Math.max(a1, .02), 1, css('--comp'), 2.2);
+  wave(x2, W - 10, A * Math.max(Math.sqrt(T1), 0), 1, css('--comp'), 2.2);
+  g.globalAlpha = .8; wave(10, x1, A * Math.sqrt(1 - T1) * .9, -1, css('--giant'), 1.4); g.globalAlpha = 1;
+  g.fillStyle = css('--soft'); g.textAlign = 'left';
+  g.font = '18px sans-serif'; g.fillText('→ 進む音', 8, H - 10); g.fillStyle = css('--giant'); g.fillText('← 跳ね返る音', 120, H - 10);
+}
+function loop(){ tick++; drawWave(); requestAnimationFrame(loop); }
+$('zl').addEventListener('input', e => setZ(Math.pow(10, +e.target.value)));
+document.querySelectorAll('[data-z]').forEach(b => b.addEventListener('click', () => setZ(+b.dataset.z)));
+setZ(1.48); reduce ? drawWave() : loop();
+// ---- 4 章：鎖の形の模型 ----
+let mol = 'brush', mt = 0;
+function seeded(s){ return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+function drawMol(){
+  const c = $('ml'), g = c.getContext('2d'), W = c.width, H = c.height; g.clearRect(0, 0, W, H);
+  const r = seeded(11), jig = reduce ? 0 : 1, top = 168;
+  g.fillStyle = css('--soft'); g.font = '18px sans-serif'; g.textAlign = 'left';
+  g.fillText(mol === 'brush' ? 'ボトルブラシ：毛が鎖の間を空ける' : 'からみ合う鎖：こすれ合う', 10, 22);
+  for (let k = 0; k < 5; k++) {
+    const y0 = 48 + k * 22;
+    g.strokeStyle = k % 2 ? css('--ink') : css('--soft'); g.lineWidth = 2; g.beginPath();
+    for (let x = 10; x <= W - 10; x += 6) {
+      const amp = mol === 'brush' ? 3 : 9, wob = jig * Math.sin(mt * (mol === 'brush' ? .3 : .08) + x * .05 + k) * (mol === 'brush' ? 2.5 : .8);
+      const y = y0 + amp * Math.sin(x * (mol === 'brush' ? .03 : .045) + k * 1.7 + r() * (mol === 'brush' ? 0 : 2.4)) + wob;
+      x === 10 ? g.moveTo(x, y) : g.lineTo(x, y);
+      if (mol === 'brush' && x % 18 === 4) { g.moveTo(x, y); g.lineTo(x + 3, y - 7); g.moveTo(x, y); g.lineTo(x - 3, y + 7); g.moveTo(x, y); }
+    }
+    g.stroke();
+  }
+  // 素材の中を進む音（模型）：強さ = exp(-k x)
+  const k = mol === 'brush' ? 0.0022 : 0.011, y = top + 62, A = 34;
+  g.fillStyle = css('--soft'); g.fillText('素材の中を進む音', 10, top + 16);
+  g.strokeStyle = css('--comp'); g.lineWidth = 2.2; g.beginPath();
+  for (let x = 10; x <= W - 10; x += 2) { const a = A * Math.exp(-k * (x - 10)); const yy = y + a * Math.sin(x * .12 - (reduce ? 0 : mt * .12)); x === 10 ? g.moveTo(x, yy) : g.lineTo(x, yy); }
+  g.stroke();
+  g.strokeStyle = css('--giant'); g.globalAlpha = .6; g.setLineDash([3, 4]); g.beginPath();
+  for (let x = 10; x <= W - 10; x += 4) { const a = A * Math.exp(-k * (x - 10)); x === 10 ? g.moveTo(x, y - a) : g.lineTo(x, y - a); }
+  g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+  const end = Math.exp(-k * (W - 20));
+  g.fillStyle = css('--ink'); g.textAlign = 'right'; g.fillText(`反対側に届く強さ 約 ${Math.round(end * 100)}%`, W - 10, H - 8);
+}
+function molLoop(){ mt++; drawMol(); requestAnimationFrame(molLoop); }
+document.querySelectorAll('[data-mol]').forEach(b => b.addEventListener('click', () => {
+  mol = b.dataset.mol; document.querySelectorAll('[data-mol]').forEach(o => o.setAttribute('aria-pressed', o === b)); if (reduce) drawMol();
+}));
+reduce ? drawMol() : molLoop();
+// ---- 6 章：日数のバー ----
+const DAYS = [['ハイドロゲル（従来）', 2, '1〜2 日で乾く', 'var(--giant)'], ['新しい素材（模型での試験）', 9, '約 9 日', 'var(--comp)']];
+function drawDays(){
+  $('days').innerHTML = DAYS.map(([n, d, l, c]) => `<div class="bar"><span>${n}</span><div class="track"><div class="fill" data-w="${d / 12 * 100}" style="background:${c}"></div><span class="v" style="left:${d / 12 * 100}%">${l}</span></div></div>`).join('');
+  const fills = [...document.querySelectorAll('#days .fill')];
+  fills.forEach((f, i) => setTimeout(() => { f.style.width = f.dataset.w + '%'; }, reduce ? 0 : 80 + i * 120));
+}
+$('replay').addEventListener('click', drawDays);
+new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { drawDays(); o.disconnect(); } }).observe($('days'));
+</script>
+</body></html>
