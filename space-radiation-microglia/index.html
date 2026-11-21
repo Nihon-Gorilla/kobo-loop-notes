@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="宇宙の放射線をまねた放射線で、マウスの脳の免疫細胞ミクログリアはどう変わったか。オスとメスで違う反応と、変わらなかった行動を前提知識なしで説明します。">
+<meta property="og:title" content="宇宙の放射線と脳の掃除屋">
+<meta property="og:description" content="宇宙の放射線とマウスの脳の免疫細胞の研究（Scientific Reports 2026）を、触って確かめながら説明します。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>宇宙の放射線と脳の掃除屋</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。オス = 橙、メス = 青緑で全編通す（--giant を オス、--comp を メスに使う） */
+:root{
+  --paper:#f3f4f6; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#c2410c; --giant-bg:#fbeee6; --comp:#0f766e; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+.chip[aria-pressed="true"]{border-color:var(--giant);color:var(--giant)}
+.bars{display:flex;flex-direction:column;gap:8px;font-size:14px}
+.bar{display:grid;grid-template-columns:minmax(7em,9em) minmax(0,1fr);gap:4px 12px;align-items:center}
+.bar .track{position:relative;height:22px;background:var(--sheet);border:1px solid var(--rule);border-radius:2px}
+.bar .fill{position:absolute;top:0;bottom:0;border-radius:1px;transition:left .3s,width .3s}
+.bar .mid{position:absolute;left:50%;top:-3px;bottom:-3px;border-left:1px solid var(--soft)}
+.bar .v{position:absolute;top:0;line-height:22px;font-family:var(--f-data);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink);padding:0 6px}
+.dose .fill{left:0}
+@media (prefers-reduced-motion: reduce){.bar .fill{transition:none}}
+</style>
+</head><body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が調べられたか</a></li>
+    <li><a href="#s2">宇宙の放射線とは</a></li>
+    <li><a href="#s3">脳の掃除屋ミクログリア</a></li>
+    <li><a href="#s4">1 細胞ずつ調べる</a></li>
+    <li><a href="#s5">オスとメスで違った反応</a></li>
+    <li><a href="#s6">行動は変わらなかった</a></li>
+    <li><a href="#s7">どこまで言えるか</a></li>
+    <li><a href="#s8">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>宇宙の放射線と<em>脳の掃除屋</em></h1>
+  <p>月や火星への長い旅では、宇宙の放射線を浴び続けます。それが脳にどう効くのかを、マウスの脳の免疫細胞 1 つ 1 つの遺伝子の働きで調べた研究が、2026 年 11 月 20 日に Scientific Reports に載りました。何が変わって、何が変わらなかったのかを、前提知識なしで順番に説明します。</p>
+  <div class="meta">2026-11-21 版 ・ 読む時間の目安 12 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が調べられたか</h2>
+  <ul>
+    <li>米ロチェスター大学の M. Kerry O'Banion さんらのチームが、宇宙の放射線をまねた放射線をマウスに当て、約 50 日後の脳を調べました。</li>
+    <li>調べたのは、脳の中の免疫細胞<strong>ミクログリア</strong>です。15,976 個について、どの遺伝子がどれだけ働いているかを 1 個ずつ測りました。</li>
+    <li>結果は 2 つに分かれました。遺伝子の働きには<strong>はっきりした変化</strong>があり、その中身はオスとメスで違いました。一方で、広い範囲の炎症や、<strong>行動・記憶の変化は見られません</strong>でした。</li>
+  </ul>
+  <div class="key"><b>KEY</b>「細胞の中では変化があるのに、行動には表れない」という結果です。危ないとも安全とも言い切れず、どこを詳しく見ればよいかの手がかりを出した研究、と読むのが正確です。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>宇宙の放射線とは</h2>
+  <p>地球の外には、銀河のどこかで生まれて飛んでくる、とても速い原子の核（イオン）が飛び交っています。これを<strong>銀河宇宙線</strong>と呼びます。地上では大気と地球の磁場が守ってくれますが、月や火星へ向かう宇宙船の中では、少しずつ浴び続けることになります。</p>
+  <p>この研究では、米ブルックヘブン国立研究所にある NASA の宇宙放射線研究所で、加速器を使って銀河宇宙線をまねた放射線を作りました。陽子、ヘリウム、酸素、ケイ素、鉄の 5 種類のイオンを順に当てる方法で、合計の量（線量）は <strong>100 cGy</strong>（センチグレイ）です。</p>
+  <p>論文の前置きによると、3 年かけて火星を往復すると、銀河宇宙線の線量は<strong>約 30〜40 cGy</strong> と見積もられています。実験の 100 cGy は、それより多い量を、短い時間にまとめて当てています。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 旅の日数と実験の線量</b>
+    <div class="row"><label for="dy">宇宙を旅する日数</label><input type="range" id="dy" min="30" max="1095" step="5" value="1095"><output id="dy-o"></output></div>
+    <div class="bars" id="dbars"></div>
+    <div class="readout"><span id="dv">—</span></div>
+    <p class="note">火星往復 3 年（1,095 日）で 30〜40 cGy という論文の見積もりを、日数に比例するとして割り振った目安です。実際の線量は太陽の活動や宇宙船の壁の厚さなどで変わり、日数にきれいに比例するわけではありません。</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>脳の掃除屋ミクログリア</h2>
+  <p>脳には、神経細胞のほかに、それを支える細胞がたくさんあります。<strong>ミクログリア</strong>はそのひとつで、脳の中を見回り、傷んだ細胞やごみを片づけ、異常があれば炎症を起こして知らせる、脳専属の免疫細胞です。「脳の掃除屋」と呼ばれることもあります。</p>
+  <p>ミクログリアが働きすぎて炎症が長く続くと、脳の働きに悪い影響が出ることがあると考えられています。そこで「宇宙の放射線はミクログリアを炎症モードにしてしまうのか」が、この研究の問いのひとつでした。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>1 細胞ずつ調べる</h2>
+  <p>細胞は、DNA に書かれた遺伝子を読み出して（RNA を作って）働きます。どの遺伝子からどれだけ RNA が作られているかを細胞 1 個ずつ数える方法を、<strong>1 細胞 RNA シーケンシング</strong>と呼びます。たくさんの細胞をまとめてすりつぶして測ると平均しか分かりませんが、1 個ずつなら細胞ごとの違いや、細胞のグループの変化まで見えます。</p>
+  <p>変化の大きさは <strong>log2FC</strong>（ログ 2 フォールドチェンジ）という数字で表します。0 なら変化なし、+1 なら 2 倍、−1 なら半分です。</p>
+  <div class="lab">
+    <b>触って確かめる ・ log2FC を倍率に直す</b>
+    <div class="row"><label for="fc">log2FC</label><input type="range" id="fc" min="-1.5" max="1.5" step="0.01" value="0.82"><output id="fc-o"></output></div>
+    <div class="readout"><span>放射線を当てなかったマウスを 100 とすると <b id="fc-v">—</b></span></div>
+    <div class="row" role="group" aria-label="論文の値を入れる">
+      <button class="chip" type="button" data-fc="0.82">Fkbp5（オス）+0.82</button>
+      <button class="chip" type="button" data-fc="0.59">Fkbp5（メス）+0.59</button>
+      <button class="chip" type="button" data-fc="-1.13">Creb5（メス）−1.13</button>
+    </div>
+    <p class="note">ボタンは論文に載っている値です。log2FC は 2 を何乗すれば倍率になるか、を表しています（倍率 = 2 の log2FC 乗）。</p>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>オスとメスで違った反応</h2>
+  <p>放射線を当てたマウスと当てなかったマウスで、働きが変わった遺伝子の数は次のとおりでした。</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>オス</th><th>メス</th></tr>
+    <tr><td>変化した遺伝子</td><td class="n">43</td><td class="n">82</td></tr>
+    <tr><td>うち 増えた</td><td class="n">35</td><td class="n">29</td></tr>
+    <tr><td>うち 減った</td><td class="n">8</td><td class="n">53</td></tr>
+  </table></div>
+  <ul>
+    <li><strong>オス</strong>では、ストレスに適応する働きの遺伝子が増え、細胞の中でたんぱく質の形を整える「シャペロン」の遺伝子が少し減りました。</li>
+    <li><strong>メス</strong>では、変化した遺伝子が多く、その多くは減る方向でした。炎症や免疫の合図に関わる遺伝子がまとめて弱まり、チームは「反応が鈍くなった」と表現しています。</li>
+    <li><strong>両方に共通</strong>して増えたのが <strong>Fkbp5</strong> という遺伝子です。ストレスの信号に関わる遺伝子で、顕微鏡でたんぱく質の量を見ても、記憶に関わる海馬の一部（歯状回）と大脳皮質のミクログリアで増えていました。チームは、これが反応の行き過ぎを抑える「ブレーキ」として働いている可能性を挙げています。</li>
+  </ul>
+  <div class="lab">
+    <b>触って確かめる ・ 論文に載った遺伝子の変化</b>
+    <div class="row" role="group" aria-label="オスかメスか">
+      <button class="chip" type="button" data-sex="m" aria-pressed="true">オス</button>
+      <button class="chip" type="button" data-sex="f" aria-pressed="false">メス</button>
+    </div>
+    <div class="bars" id="gbars"></div>
+    <p class="note">真ん中の線が変化なし（0）、右が増加、左が減少です。論文の本文で名前と値が挙げられた遺伝子だけを並べています。変化した遺伝子のすべてではありません。</p>
+  </div>
+  <p>一方で、ミクログリアが炎症モードになったときに増える代表的な遺伝子（Il1b、Tnf、Nlrp3 など）は、はっきりした変化がありませんでした。論文のタイトルにも「広い炎症の活性化なしに」と書かれています。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>行動は変わらなかった</h2>
+  <p>脳を調べる前（放射線から 48〜51 日後）に、3 つの行動テストをしました。</p>
+  <ul>
+    <li><strong>オープンフィールド</strong>：広い箱の中での動き回り方や不安の強さを見る。差なし。</li>
+    <li><strong>新しい物の見分け</strong>：見たことのある物と新しい物を見分けられるかを見る。差なし。ただし、このテストでは放射線を当てなかったマウスも含めて、どの群も新しい物を見分けられていなかったと書かれています。</li>
+    <li><strong>恐怖の記憶</strong>：嫌なことが起きた場所を覚えているかを見る。差なし。</li>
+  </ul>
+  <div class="key"><b>KEY</b>遺伝子の働きが変わっても、それがすぐ行動に出るとは限りません。細胞の中の変化が、ほかの仕組みで打ち消されていることもあれば、もっと時間がたってから表れることもあります。この研究は 1 つの時点しか見ていないので、どちらなのかはまだ分かりません。</div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>どこまで言えるか</h2>
+  <ul>
+    <li><strong>マウスの結果</strong>です。人の脳で同じことが起きるかは分かりません。</li>
+    <li><strong>1 つの時点</strong>（約 50 日後）、<strong>1 つの線量</strong>（100 cGy を短時間に）だけを見ています。実際の旅のように何年もかけて少しずつ浴びた場合とは違う可能性があります。</li>
+    <li>1 細胞の解析は各グループ <strong>3 匹ずつ</strong>で、小さな変化は見逃しやすい規模です。チームも「探索的な結果」としています。</li>
+    <li>見たのはミクログリアだけで、神経細胞などほかの細胞は調べていません。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>「宇宙の放射線は脳に害がない」とも「脳が壊れる」とも、この研究からは言えません。分かったのは、オスとメスで反応の仕方が違うこと、そして炎症とは別の形の変化が起きていることです。チームは、危険の見積もりに性差を入れる必要があると述べています。</div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">8</span>用語集</h2>
+  <dl>
+    <dt>銀河宇宙線</dt><dd>銀河のどこかで生まれ、宇宙を飛んでくるとても速い原子の核。</dd>
+    <dt>cGy（センチグレイ）</dt><dd>放射線の量の単位。体 1 kg がどれだけのエネルギーを受け取ったかを表す。100 cGy = 1 Gy。</dd>
+    <dt>ミクログリア</dt><dd>脳の中を見回り、ごみを片づけ、異常を知らせる免疫細胞。</dd>
+    <dt>1 細胞 RNA シーケンシング</dt><dd>細胞 1 個ずつ、どの遺伝子がどれだけ働いているかを数える方法。</dd>
+    <dt>log2FC</dt><dd>変化の大きさ。+1 で 2 倍、−1 で半分。</dd>
+    <dt>シャペロン</dt><dd>細胞の中でたんぱく質の形を整える手助けをするたんぱく質。</dd>
+    <dt>歯状回</dt><dd>記憶に関わる海馬の一部。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>論文：Osabutey ほか「Single-cell transcriptomic profiling reveals sex-specific microglial responses to simulated galactic cosmic radiation without broad inflammatory activation」<a href="https://www.nature.com/articles/s41598-026-77661-9" target="_blank" rel="noopener">Scientific Reports 16, 37532（2026）</a></li>
+  </ul>
+</section>
+
+<footer>
+  <span>事実の出どころ：Scientific Reports の論文本文（2026-11-20 公開、2026-11-21 確認）。2 章の「触って確かめる」の日数ごとの線量は、論文にある火星往復の見積もりを日数で割った目安です。論文の図は転載していません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+// ---- 2 章：旅の日数と実験の線量 ----
+function drawDose(){
+  const d = +$('dy').value, lo = 30 * d / 1095, hi = 40 * d / 1095, max = 135;
+  $('dy-o').textContent = d + ' 日（約 ' + (d / 365).toFixed(1) + ' 年）';
+  const pct = v => (v / max * 100).toFixed(1) + '%';
+  $('dbars').innerHTML =
+    `<div class="bar dose"><span>旅の目安</span><div class="track"><div class="fill" style="width:${pct(hi)};background:var(--comp);opacity:.35"></div><div class="fill" style="width:${pct(lo)};background:var(--comp)"></div><span class="v" style="left:${pct(hi)}">${lo.toFixed(lo < 10 ? 1 : 0)}〜${hi.toFixed(hi < 10 ? 1 : 0)} cGy</span></div></div>` +
+    `<div class="bar dose"><span>実験</span><div class="track"><div class="fill" style="width:${pct(100)};background:var(--giant)"></div><span class="v" style="left:${pct(100)}">100 cGy</span></div></div>`;
+  const a = 100 / hi, b = 100 / lo;
+  $('dv').textContent = `実験の線量は、この日数の旅の約 ${a.toFixed(a < 10 ? 1 : 0)}〜${b.toFixed(b < 10 ? 1 : 0)} 倍`;
+}
+$('dy').addEventListener('input', drawDose); drawDose();
+// ---- 4 章：log2FC を倍率に ----
+function drawFc(){
+  const x = +$('fc').value, r = Math.pow(2, x);
+  $('fc-o').textContent = (x > 0 ? '+' : '') + x.toFixed(2);
+  $('fc-v').textContent = '約 ' + Math.round(r * 100) + '（' + r.toFixed(2) + ' 倍）';
+}
+$('fc').addEventListener('input', drawFc);
+document.querySelectorAll('[data-fc]').forEach(b => b.addEventListener('click', () => { $('fc').value = b.dataset.fc; drawFc(); }));
+drawFc();
+// ---- 5 章：論文本文に名前と値が載った遺伝子 ----
+const GENES = {
+  m: [['Fkbp5', .82], ['Ddit4', .90], ['Adrb1', .60]],
+  f: [['Fkbp5', .59], ['Ccnd3', .66], ['P3h2', .64], ['Tnfaip2', .62], ['Ddit4', .55], ['Tsc22d3', .50], ['Nlrp3', -.51], ['Dusp16', -.55], ['Snx24', -.59], ['Bcl2', -.66], ['Ubash3b', -.81], ['Jun', -.83], ['Creb5', -1.13]]
+};
+function drawGenes(s){
+  const col = s === 'm' ? 'var(--giant)' : 'var(--comp)', M = 1.3;
+  $('gbars').innerHTML = GENES[s].map(([g, v]) => {
+    const w = Math.abs(v) / M * 50, left = v >= 0 ? 50 : 50 - w;
+    const lab = v >= 0 ? `left:${50 + w}%` : `right:${50 + w}%`;
+    return `<div class="bar"><span><code>${g}</code></span><div class="track"><div class="mid"></div><div class="fill" style="left:${left}%;width:${w}%;background:${col}"></div><span class="v" style="${lab}">${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(2)}</span></div></div>`;
+  }).join('');
+}
+document.querySelectorAll('[data-sex]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-sex]').forEach(o => o.setAttribute('aria-pressed', o === b));
+  drawGenes(b.dataset.sex);
+}));
+drawGenes('m');
+</script>
+</body></html>
