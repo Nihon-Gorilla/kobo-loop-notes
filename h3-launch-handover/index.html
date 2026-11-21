@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="H3ロケットの打ち上げが JAXA から三菱重工業へ段階的に移ります。「売る」と「法律上の責任を持って飛ばす」の違いを、号機ごとにたどって説明します。">
+<meta property="og:title" content="ロケットを飛ばすのは誰か">
+<meta property="og:description" content="H3ロケットの打ち上げ移管（2027年1月の11号機から）を、号機ごとの役割分担で確かめます。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ロケットを飛ばすのは誰か</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。JAXA = 青（--comp）、三菱重工 = 朱（--giant）で全編通す。動きは Corporate：easing (0.2,0,0,1)、150/280/450ms */
+:root{
+  --paper:#f4f4f2; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#c2410c; --giant-bg:#fbeee6; --comp:#2b6cb0; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#8fc0ff; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#8fc0ff; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+/* 日本語組版（jp-design）：禁則、約物詰め、和欧間、見出しの文節改行 */
+:root{--ease:cubic-bezier(.2,0,0,1);--t-quick:150ms;--t-std:280ms;--t-slow:450ms}
+main{line-break:strict;overflow-wrap:anywhere;font-feature-settings:"palt" 1;line-height:1.85}
+main code,main table,.eq,.lab output,.readout b{font-feature-settings:normal}
+@supports (text-autospace:normal){main{text-autospace:normal}}
+@supports (text-spacing-trim:normal){main{text-spacing-trim:normal}}
+@supports (word-break:auto-phrase){h1,h2,h3{word-break:auto-phrase}}
+em{font-style:normal}
+.chip{transition:border-color var(--t-quick) var(--ease),color var(--t-quick) var(--ease),transform var(--t-quick) var(--ease)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+/* 号機の列 */
+.flights{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px}
+.fl{appearance:none;border:1px solid var(--rule);background:var(--sheet);border-radius:3px;padding:6px 0 4px;font:600 13px var(--f-data);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:0;transform:translateY(8px);transition:opacity var(--t-std) var(--ease),transform var(--t-std) var(--ease),border-color var(--t-quick) var(--ease),box-shadow var(--t-quick) var(--ease)}
+.fl.in{opacity:1;transform:none}
+.fl i{width:9px;height:9px;border-radius:50%;background:var(--faint)}
+.fl.ok i{background:var(--comp)} .fl.ng i{background:var(--bad)} .fl.plan i{background:transparent;border:2px solid var(--giant);width:7px;height:7px}
+.fl.plan i{animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.35);opacity:.55}}
+.fl[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 2px 0 var(--ink)}
+.fl:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--soft)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.col{background:var(--sheet);border:1px solid var(--rule);border-top:4px solid var(--c);border-radius:3px;padding:10px;min-height:150px;display:flex;flex-direction:column;gap:8px}
+.col h4{margin:0;font:700 14px var(--f-display);color:var(--c)}
+.role{border:1px solid var(--rule);border-left:4px solid var(--c);border-radius:3px;padding:7px 10px;font-size:13.5px;line-height:1.5;background:var(--paper);box-shadow:0 1px 0 var(--rule);transition:box-shadow var(--t-std) var(--ease)}
+.role small{display:block;color:var(--soft);font-size:12px}
+.role.off{opacity:.55;border-left-style:dashed}
+.role.moving{box-shadow:0 8px 18px -8px rgba(0,0,0,.35)}
+.fact{font-size:14px;display:grid;grid-template-columns:auto 1fr;gap:2px 14px}
+.fact dt{color:var(--soft);font-weight:400}.fact dd{margin:0;font-weight:500}
+/* 形態の図 */
+.rk{display:block;width:100%;max-width:340px;height:auto;margin:0 auto}
+.rk .srb{transition:transform var(--t-slow) var(--ease),opacity var(--t-std) var(--ease)}
+.rk .eng{transition:opacity var(--t-std) var(--ease),transform var(--t-std) var(--ease)}
+@media (prefers-reduced-motion: reduce){.fl,.rk .srb,.rk .eng,.role,.chip{transition:none}.fl.plan i{animation:none}.fl{opacity:1;transform:none}}
+</style>
+</head><body>
+
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が決まったか</a></li>
+    <li><a href="#s2">売る人と、責任を持つ人</a></li>
+    <li><a href="#s3">号機ごとにたどる</a></li>
+    <li><a href="#s4">「22形態」の読み方</a></li>
+    <li><a href="#s5">移管後の 1 機目</a></li>
+    <li><a href="#s6">なぜ民間に任せるのか</a></li>
+    <li><a href="#s7">まだ決まっていないこと</a></li>
+    <li><a href="#s8">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>ロケットを<em>飛ばす</em>のは誰か</h1>
+  <p>日本の主力ロケット H3 の打ち上げを、JAXA から三菱重工業に段階的に任せることが決まりました。ロケットを「作る」「売る」「法律上の責任を持って飛ばす」は、それぞれ別の役割です。何が誰から誰に移るのかを、号機ごとにたどりながら説明します。</p>
+  <div class="meta">2026-11-21 版 ・ 読む時間の目安 10 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が決まったか</h2>
+  <ul>
+    <li>2026 年 11 月 20 日、JAXA（宇宙航空研究開発機構）は、H3 ロケットの「<strong>22 形態</strong>」について、今後は<strong>三菱重工業が打ち上げを実施する</strong>ことで三菱重工業と合意したと発表しました。</li>
+    <li>移管後の最初の打ち上げは <strong>11 号機</strong>で、2027 年 1 月 11 日に種子島宇宙センターから打ち上げる予定です。</li>
+    <li>ほかの形態や、新しいエンジンを使った機体も、関係者と話し合いながら<strong>段階的に</strong>民間に移していく計画です。</li>
+  </ul>
+  <div class="key"><b>KEY</b>ロケットそのものが変わるわけではありません。変わるのは「法律の上で、誰が打ち上げの実施者になるか」です。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>売る人と、責任を持つ人</h2>
+  <p>ロケットの打ち上げには、いくつもの役割があります。この記事で注目するのは次の 2 つです。</p>
+  <ul>
+    <li><strong>打上げ輸送サービス</strong>：衛星を宇宙へ運ぶ仕事を、お客さんから請け負うこと。いわば「運送を売る」役割です。H3 では <strong>4 号機から</strong>三菱重工業が担ってきました。</li>
+    <li><strong>打上げ実施者</strong>：「人工衛星等の打上げ及び人工衛星の管理に関する法律」（宇宙活動法）の上で、国の許可を受けて打ち上げを行う者。これまで H3 では、すべて <strong>JAXA</strong> が担ってきました。</li>
+  </ul>
+  <p>つまりこれまでは「売るのは三菱重工業、法律上飛ばすのは JAXA」という分担でした。今回の合意で、22 形態では<strong>両方を三菱重工業が担う</strong>ことになります。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>号機ごとにたどる</h2>
+  <p>H3 はこれまで 10 機が打ち上げられ、8 機が成功しています（失敗は試験機 1 号機と 8 号機）。号機を選ぶと、そのときの役割分担が動きます。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 号機ごとの役割分担</b>
+    <div class="flights" id="flights" role="group" aria-label="号機を選ぶ"></div>
+    <div class="legend"><span><i style="background:var(--comp)"></i>成功</span><span><i style="background:var(--bad)"></i>失敗</span><span><i style="border:2px solid var(--giant);width:7px;height:7px"></i>予定</span></div>
+    <dl class="fact" id="fact"></dl>
+    <div class="board">
+      <div class="col" id="c-jaxa" style="--c:var(--comp)"><h4>JAXA</h4></div>
+      <div class="col" id="c-mhi" style="--c:var(--giant)"><h4>三菱重工業</h4></div>
+    </div>
+    <p class="note">役割は JAXA の発表（2026-11-20）にもとづきます。「H3 の開発」は JAXA が今後も LE-9 エンジン Type2 の開発と H3 の高度化を続けるという記述から、「機体開発の取りまとめ」は報道（SPACE CONNECT）の記述から置いています。形態は出典に書かれている号機だけ表示しています。</p>
+  </div>
+  <p>6 号機だけ輸送サービスがないのは、6 号機が「30 形態」の試験機だったためです。JAXA は、6 号機では三菱重工業の輸送サービスを受けず、JAXA が打ち上げを実施したと説明しています。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>「22 形態」の読み方</h2>
+  <p>H3 は、付けるエンジンと補助ロケットの数を変えて、運ぶ衛星に合わせられるロケットです。その組み合わせを「形態」と呼びます。JAXA によると、<strong>22 形態</strong>は第 1 段のメインエンジン <span lang="en">LE-9</span> が <strong>2 基</strong>、固体ロケットブースタ <span lang="en">SRB-3</span> が <strong>2 本</strong>の形です。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 形態を切り替える</b>
+    <div class="row" role="group" aria-label="形態">
+      <button class="chip" type="button" data-cfg="22" aria-pressed="true">22 形態</button>
+      <button class="chip" type="button" data-cfg="30" aria-pressed="false">30 形態</button>
+    </div>
+    <svg class="rk" id="rk" viewBox="0 0 220 300" role="img" aria-labelledby="rk-t">
+      <title id="rk-t">H3 ロケットの模式図。第 1 段の下にエンジン、横にブースタが付く</title>
+    </svg>
+    <div class="readout"><span id="cfg-v">—</span></div>
+    <p class="note">形の比率は実物どおりではない模式図です。30 形態は固体ロケットブースタを付けず、液体ロケットエンジンだけで飛ぶ形態です（報道による）。エンジンの数 3 基は、形態名の 1 桁目がエンジンの数を表すという読み方からの説明です。</p>
+  </div>
+  <p>今回、民間に移すのは 22 形態からです。22 形態は試験機 2 号機から 5 号機と 9 号機で打ち上げに成功していて、いちばん実績のある形です。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>移管後の 1 機目</h2>
+  <div class="tbl"><table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>号機</td><td>H3 ロケット 11 号機（22 形態）</td></tr>
+    <tr><td>打ち上げ予定日</td><td>2027 年 1 月 11 日</td></tr>
+    <tr><td>時間帯</td><td>午前 8 時〜10 時（日本時間）。具体的な時刻は未発表</td></tr>
+    <tr><td>予備期間</td><td>2027 年 1 月 12 日〜2 月 28 日</td></tr>
+    <tr><td>場所</td><td>種子島宇宙センター 大型ロケット発射場</td></tr>
+    <tr><td>載せる衛星</td><td>情報収集衛星「光学時間軸多様化 1 号機」</td></tr>
+  </table></div>
+  <p>情報収集衛星は、政府が使う地球観測の衛星です。「時間軸多様化」は、これまでとは違う時間帯に地上を撮影する衛星のことで、政府は全部で 10 機の体制にする方針です。</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>なぜ民間に任せるのか</h2>
+  <p>JAXA の発表には、理由ははっきり書かれていません。報道（SPACE CONNECT）によると、JAXA は「H3 を長く使い続け、日本の宇宙輸送の産業を保つには、政府の衛星だけでなく、民間の商業衛星の注文を取ることが欠かせない」としています。</p>
+  <p>売る役割と法律上の責任の両方を同じ会社が持てば、注文を受けてから打ち上げるまでを一つの会社で通して進められます。JAXA は、次の世代のエンジン <span lang="en">LE-9 Type2</span> の開発と、H3 の性能を上げる取り組みに力を向ける、という分担です。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>まだ決まっていないこと</h2>
+  <ul>
+    <li><strong>ほかの形態をいつ移すか</strong>：30 形態などのほかの形態や、<span lang="en">Type2</span> エンジンを使う機体は「関係者と協議の上で段階的に」とされ、時期は出ていません。</li>
+    <li><strong>11 号機の打ち上げ時刻</strong>：時間帯は決まっていますが、具体的な時刻はまだ発表されていません。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>「民営化」と書かれることもありますが、JAXA がロケットの開発から手を引くわけではありません。移るのは 22 形態の打ち上げの実施で、エンジンの開発や高度化は JAXA が続けます。</div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">8</span>用語集</h2>
+  <dl>
+    <dt>JAXA</dt><dd>宇宙航空研究開発機構。日本の宇宙開発を担う国の研究開発機関。</dd>
+    <dt>打上げ輸送サービス</dt><dd>衛星を宇宙へ運ぶ仕事を、お客さんから請け負うこと。</dd>
+    <dt>打上げ実施者</dt><dd>宇宙活動法の上で、国の許可を受けて打ち上げを行う者。</dd>
+    <dt>形態</dt><dd>エンジンと補助ロケットの組み合わせ。22 形態はエンジン 2 基、ブースタ 2 本。</dd>
+    <dt><span lang="en">LE-9</span></dt><dd>H3 の第 1 段のメインエンジン。今は <span lang="en">Type1A</span> を使い、最終形の <span lang="en">Type2</span> を JAXA が開発中。</dd>
+    <dt><span lang="en">SRB-3</span></dt><dd>H3 の固体ロケットブースタ。打ち上げ直後の推力を足す。</dd>
+    <dt>予備期間</dt><dd>天候などで予定日に打ち上げられない場合に備えて、確保しておく期間。</dd>
+  </dl>
+  <h3>もっと知りたい時</h3>
+  <ul>
+    <li>JAXA プレスリリース「<a href="https://www.jaxa.jp/press/2026/11/20261120-1_j.html" target="_blank" rel="noopener">H3ロケットの民間による打上げへの段階的移行</a>」（2026-11-20）</li>
+    <li>マイナビニュース TECH+「<a href="https://news.mynavi.jp/techplus/article/20261120-5367950/" target="_blank" rel="noopener">H3ロケット打上げ、三菱重工へ段階的に移管　'27年1月の11号機から</a>」</li>
+    <li>SPACE CONNECT「<a href="https://space-connect.jp/h3-rocket-11/" target="_blank" rel="noopener">H3ロケット11号機、2027年1月11日打ち上げへ</a>」</li>
+  </ul>
+</section>
+
+<footer>
+  <span>事実の出どころ：JAXA のプレスリリース（2026-11-20）を基本に、11 号機の日程・衛星・これまでの成否はマイナビニュースと SPACE CONNECT の記事（いずれも 2026-11-20、2026-11-21 確認）によります。4 章の図は模式図です。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const EASE = 'cubic-bezier(.2,0,0,1)';
+// ---- 3 章：号機ごとの役割分担（出典に書かれた事実だけ） ----
+const F = {
+  1:{r:'ng',t:'失敗（試験機 1 号機）',cfg:'—',svc:false},
+  2:{r:'ok',t:'成功',cfg:'22 形態',svc:false},
+  3:{r:'ok',t:'成功',cfg:'22 形態',svc:false},
+  4:{r:'ok',t:'成功',cfg:'22 形態',svc:true},
+  5:{r:'ok',t:'成功',cfg:'22 形態',svc:true},
+  6:{r:'ok',t:'成功',cfg:'30 形態（試験機）',svc:false},
+  7:{r:'ok',t:'成功',cfg:'—',svc:true},
+  8:{r:'ng',t:'失敗',cfg:'—',svc:true},
+  9:{r:'ok',t:'成功',cfg:'22 形態',svc:true},
+  10:{r:'ok',t:'成功（2026-10-20、火星衛星探査機 MMX）',cfg:'—',svc:true},
+  11:{r:'plan',t:'予定（2027-01-11、情報収集衛星）',cfg:'22 形態',svc:true,mhi:true}
+};
+const card = (id, title, sub) => { const d = document.createElement('div'); d.className = 'role'; d.id = id; d.innerHTML = `${title}<small>${sub}</small>`; return d; };
+const dev = card('r-dev', 'H3 の開発', 'エンジン Type2 の開発、性能の向上');
+const make = card('r-make', '機体開発の取りまとめ', '報道による');
+const svc = card('r-svc', '打上げ輸送サービス', '');
+const imp = card('r-imp', '打上げ実施者（宇宙活動法）', '国の許可を受けて打ち上げる');
+$('c-jaxa').append(dev, imp); $('c-mhi').append(make, svc);
+function moveTo(el, col){
+  if (el.parentElement === col) return;
+  const a = el.getBoundingClientRect(); col.append(el);
+  if (reduce) return;
+  const b = el.getBoundingClientRect();
+  el.classList.add('moving');
+  el.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px)`},{transform:'none'}],{duration:450,easing:EASE})
+    .finished.then(() => el.classList.remove('moving'));
+}
+function pick(n){
+  const f = F[n];
+  document.querySelectorAll('.fl').forEach(b => b.setAttribute('aria-pressed', +b.dataset.n === n));
+  $('fact').innerHTML = `<dt>号機</dt><dd>${n} 号機</dd><dt>結果</dt><dd>${f.t}</dd><dt>形態</dt><dd>${f.cfg === '—' ? '出典に記載なし' : f.cfg}</dd>`;
+  svc.classList.toggle('off', !f.svc);
+  svc.querySelector('small').textContent = f.svc ? 'お客さんから打上げを請け負う' : 'この号機ではなし';
+  moveTo(imp, f.mhi ? $('c-mhi') : $('c-jaxa'));
+}
+Object.keys(F).forEach((n, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'fl ' + F[n].r; b.dataset.n = n;
+  b.setAttribute('aria-label', `${n} 号機：${F[n].t}`);
+  b.innerHTML = `${n}<i></i>`;
+  b.addEventListener('click', () => pick(+n));
+  $('flights').append(b);
+  setTimeout(() => b.classList.add('in'), reduce ? 0 : 40 * i);
+});
+pick(10);
+// ---- 4 章：形態の模式図 ----
+const NS = 'http://www.w3.org/2000/svg';
+const el = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+const rk = $('rk');
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function buildRocket(){
+  rk.querySelectorAll(':not(title)').forEach(n => n.remove());
+  const ink = css('--soft'), core = css('--sheet'), line = css('--ink'), srbC = css('--giant'), engC = css('--comp');
+  const L = el('g', {class:'srb', id:'srbL'}), R = el('g', {class:'srb', id:'srbR'});
+  [[L, 62], [R, 140]].forEach(([g, x]) => {
+    g.append(el('path', {d:`M${x} 150 q9 -22 18 0 v100 h-18 z`, fill:srbC, opacity:.85, stroke:line, 'stroke-width':1}));
+    g.append(el('path', {d:`M${x+3} 250 h12 l3 12 h-18 z`, fill:line, opacity:.7}));
+    rk.append(g);
+  });
+  rk.append(el('path', {d:'M84 60 q26 -52 52 0 v190 h-52 z', fill:core, stroke:line, 'stroke-width':1.5}));
+  rk.append(el('line', {x1:84, y1:110, x2:136, y2:110, stroke:ink, 'stroke-dasharray':'3 3'}));
+  [['第 2 段', 96], ['第 1 段', 190]].forEach(([s, y]) => { const t2 = el('text', {x:110, y, 'text-anchor':'middle', 'font-size':11, fill:ink}); t2.textContent = s; rk.append(t2); });
+  const engs = el('g', {id:'engs'});
+  [[100, 'e1'], [120, 'e2'], [110, 'e3']].forEach(([x, id]) => engs.append(el('path', {class:'eng', id, d:`M${x-4} 250 h8 l4 16 h-16 z`, fill:engC})));
+  rk.append(engs);
+  const t = el('text', {x:110, y:290, 'text-anchor':'middle', 'font-size':12, fill:ink}); t.textContent = 'H3 ロケット（模式図）'; rk.append(t);
+}
+function setCfg(c){
+  document.querySelectorAll('[data-cfg]').forEach(b => b.setAttribute('aria-pressed', b.dataset.cfg === c));
+  const two = c === '22';
+  // 22：エンジン 2 基（左右）＋ブースタ 2 本。30：エンジン 3 基（左右＋中央）、ブースタなし
+  $('e1').setAttribute('transform', two ? '' : 'translate(-6 0)');
+  $('e2').setAttribute('transform', two ? '' : 'translate(6 0)');
+  $('e3').style.opacity = two ? 0 : 1;
+  ['srbL', 'srbR'].forEach((id, i) => { const g = $(id); g.style.opacity = two ? 1 : 0; g.style.transform = two ? 'none' : `translate(${i ? 24 : -24}px, 40px)`; });
+  $('cfg-v').innerHTML = two ? 'LE-9 エンジン 2 基 ＋ SRB-3 ブースタ 2 本 → <span style="white-space:nowrap">「2」「2」で 22 形態</span>' : 'LE-9 エンジン 3 基 ＋ ブースタなし → <span style="white-space:nowrap">「3」「0」で 30 形態</span>';
+}
+buildRocket(); setCfg('22');
+document.querySelectorAll('[data-cfg]').forEach(b => b.addEventListener('click', () => setCfg(b.dataset.cfg)));
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { const c = document.querySelector('[data-cfg][aria-pressed="true"]').dataset.cfg; buildRocket(); setCfg(c); });
+</script>
+</body></html>
