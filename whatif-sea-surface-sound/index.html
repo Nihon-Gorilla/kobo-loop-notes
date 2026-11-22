@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="超音波のゼリーの考え方を海の大きさまで広げる思考実験。空気と海の境目で跳ね返る音を、間にはさむ層でどこまで通せるかを動かして確かめます。">
+<meta name="description" content="超音波のゼリーの考え方を海まで広げる思考実験。海面が音を通すようになったら、クジラ・港町・漁業・潜水艦はどうなるか。事実と想像を分けてたどります。">
 <meta property="og:title" content="もしも海の表面が音を通したら">
-<meta property="og:description" content="空気と海の境目では音の99.9%が跳ね返ります。どの高さの音も通す膜で海を覆えたら？（もしもシリーズ）">
+<meta property="og:description" content="今の海が静かなのは、海面が音のふたになっているから。そのふたが消えた世界を、事実と想像を分けてたどります（もしもシリーズ）。">
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -103,6 +103,10 @@ em{font-style:normal}
 .big span{font-size:13px;color:var(--soft)}
 .big b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;line-height:1.3;font-feature-settings:normal}
 .big small{font-size:12.5px;color:var(--soft)}
+.scene{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.tag{display:inline-block;font-size:12px;font-weight:700;border-radius:2px;padding:0 6px;margin-right:8px;line-height:1.7;vertical-align:1px}
+.tag.fact{background:var(--comp);color:var(--sheet)}
+.tag.imag{border:1px solid var(--giant);color:var(--giant)}
 </style>
 </head><body>
 <div class="page">
@@ -112,7 +116,7 @@ em{font-style:normal}
     <li><a href="#s1">ニュースから「もしも」へ</a></li>
     <li><a href="#s2">空気と海のあいだ</a></li>
     <li><a href="#s3">間に 1 枚はさむ</a></li>
-    <li><a href="#s4">もしも海面が音を通したら</a></li>
+    <li><a href="#s4">静かな海がなくなる日</a></li>
     <li><a href="#s5">どこからが仮定か</a></li>
     <li><a href="#s6">計算のしかた</a></li>
     <li><a href="#s7">用語集</a></li>
@@ -123,7 +127,7 @@ em{font-style:normal}
 <header>
   <span class="series">もしもシリーズ</span>
   <h1>もしも<em>海の表面</em>が<br>音を通したら</h1>
-  <p>超音波検査のゼリーは、装置と肌のすき間を埋めて音を通します。では、空気と海のあいだにも「音のゼリー」を敷けたらどうなるでしょう。ニュースで読んだ仕組みを土台に、制約を外して海の大きさまで広げてみます。</p>
+  <p>超音波検査のゼリーは、装置と肌のすき間を埋めて音を通します。では、空気と海のあいだにも「音のゼリー」を敷けたらどうなるでしょう。今の海が静かなのは、海面が音のふたになっているからです。そのふたが消えた世界で、クジラや港町、潜水艦に何が起きるかを、事実と想像を分けてたどります。</p>
   <div class="meta">2026-11-22 版 ・ 読む時間の目安 8 分 ・ 途中の「触って確かめる」は動かせます</div>
 </header>
 
@@ -175,25 +179,47 @@ em{font-style:normal}
 </section>
 
 <section id="s4">
-  <h2><span class="n">4</span>もしも海面が音を通したら</h2>
-  <p>ここで制約を外します。<strong>どの高さの音も 100 % 通す、薄い膜</strong>があって、それで海の表面を覆えたとします。</p>
+  <h2><span class="n">4</span>静かな海がなくなる日</h2>
+  <p>ここで制約を外します。ある日、<strong>どの高さの音も 100 % 通す薄い膜</strong>が、世界中の海の表面を覆ったとします。</p>
   <div class="big">
-    <div><span>海に届く音のエネルギー</span><b>約 930 倍</b><small>0.1 % → 100 %</small></div>
-    <div><span>音の大きさ（デシベル）</span><b>約 +30 dB</b><small>境目を通る分だけで比べて</small></div>
+    <div><span>境目を通る音のエネルギー</span><b>約 930 倍</b><small>0.1 % → 100 %</small></div>
+    <div><span>デシベルで言うと</span><b>約 +30 dB</b><small>境目を通る分だけで比べて</small></div>
   </div>
-  <p>30 dB は、エネルギーで約 1,000 倍の違いです。境目で失われていた分がそのまま届くので、こんなことが起きるはずです。</p>
-  <ul>
-    <li><strong>浜辺で海の中が「聞こえる」</strong>：波の下の音が、今より 30 dB 近く大きく空気中に出てきます。</li>
-    <li><strong>海の中が騒がしくなる</strong>：反対に、地上の車や人の声、雷の音も、海の中にずっと多く入ります。今の海は、海面のおかげで地上の音から守られているとも言えます。</li>
-  </ul>
-  <div class="key warn"><b>NOTE</b>届く音が増えるのは境目の分だけです。遠くへ行くほど音が弱まる分や、波の音などのまわりの音は、この計算に入れていません。</div>
+  <p>空から海へも、海から空へも、音が今の約 1,000 倍通るようになります。そこから先は、事実を土台にした想像です。それぞれ「土台（事実）」と「想像」を分けて書きます。</p>
+
+  <h3>1 日目：海が聞こえる</h3>
+  <div class="scene">
+    <p><span class="tag fact">土台</span>海でいちばん続く音のもとは、行き交う商船です（NOAA）。</p>
+    <p><span class="tag imag">想像</span>港や航路に近い浜辺では、波の音にまじって、沖を通る船の低いうなりが聞こえはじめます。今までは海面がふたをしていた音です。海が「静かな場所」でなくなったことに、人がまず気づきます。</p>
+  </div>
+
+  <h3>1 週間後：クジラの声がかき消される</h3>
+  <div class="scene">
+    <p><span class="tag fact">土台</span>クジラにとって、音を聞き、音で伝え合うことは生きるために欠かせません。仲間との連絡、移動、えさ探し、敵を避けるのに音を使います。魚やエビ・カニのなかまも音を使っています（NOAA）。今の海でも、アメリカ東海岸の保護区では、おもに船の音のせいで、絶滅が心配されているセミクジラの「声が届く範囲」が平均 63〜67 % 失われていると見積もられています（NOAA、2012 年）。</p>
+    <p><span class="tag imag">想像</span>そこへ、雷、雨、飛行機、海辺の道路や街の音が、空から海へなだれこみます。都市や空港に近い海ほど騒がしくなり、クジラは仲間の声を聞き取りにくくなります。静かな沖へ移るクジラが出てくるかもしれません。</p>
+  </div>
+
+  <h3>1 か月後：港町と漁業</h3>
+  <div class="scene">
+    <p><span class="tag fact">土台</span>魚も音を使って暮らしています（NOAA）。</p>
+    <p><span class="tag imag">想像</span>魚が騒がしい岸近くを避けると、沿岸の漁場の様子も変わるかもしれません。港町では、花火大会やお祭りの音が海の中に届くことが話題になり、「海に音を入れない時間」を決める町が出てくるかもしれません。逆に、静かな夜の浜辺で海の中の音を聞くのが、新しい観光になる町もありそうです。</p>
+  </div>
+
+  <h3>半年後：隠れられない潜水艦</h3>
+  <div class="scene">
+    <p><span class="tag fact">土台</span>パッシブソナーは、自分では音を出さずに、潜水艦や船が出す音を聞いて見つける装置です。見つかりたくない軍の船を探すのにも使われます（NOAA）。</p>
+    <p><span class="tag imag">想像</span>海の中の音が空へ漏れるなら、海の上の飛行機やヘリコプターのマイクでも、潜水艦の音を拾いやすくなるかもしれません。反対に、海の中は空からの雑音でうるさくなり、海の中どうしで音を聞き分けるのは難しくなります。音で探し合う「静かな海の隠れんぼ」のルールが、根本から変わってしまうかもしれません。</p>
+  </div>
+
+  <div class="key warn"><b>NOTE</b>「1 週間後」などの時間の区切りは、話を追いやすくするための演出です。計算したのは境目を通る音の割合（約 1,000 倍）だけで、遠くへ行くほど音が弱まる分、クジラや魚の実際の動き、社会の反応は計算していません。</div>
 </section>
 
 <section id="s5">
   <h2><span class="n">5</span>どこからが仮定か</h2>
   <dl>
     <dt>本当のこと</dt><dd>境目で音が跳ね返ること、空気と海水の音響インピーダンスの値、整合層の考え方と「4 分の 1 波長の高さだけで働く」こと（物理の教科書の内容）。ゼリーなしの超音波の研究そのもの（<a href="../ultrasound-without-gel/">前の記事</a>）。</dd>
-    <dt>仮定</dt><dd>どの高さの音も 100 % 通す膜があること。それで海の表面を覆えること。波や泡で海面が乱れないこと。音が海面にまっすぐ当たること。</dd>
+    <dt>仮定</dt><dd>どの高さの音も 100 % 通す膜があること。それで世界中の海の表面を覆えること。波や泡で海面が乱れないこと。音が海面にまっすぐ当たること。</dd>
+    <dt>想像</dt><dd>4 章の「1 日目」から「半年後」の出来事。土台（事実）は NOAA の説明によるものですが、そこから先の、船の音が浜辺で聞こえる・クジラが沖へ移る・漁場や港町や潜水艦の探し方が変わる、はすべて想像で、計算や研究の結果ではありません。</dd>
     <dt>研究との関係</dt><dd>MIT などの新素材は、体と装置という「近い性質どうし」をつなぐ素材です。空気と海をつなぐ素材ではありません。この記事の膜は、研究から考え方だけを借りた想像です。</dd>
   </dl>
 </section>
@@ -217,7 +243,7 @@ em{font-style:normal}
 </section>
 
 <footer>
-  <span>このページは「<a href="../ultrasound-without-gel/">ゼリーなしの超音波</a>」から広げた思考実験です。数字は、空気と海水の音響インピーダンス（空気 約 415 Rayl、海水は密度約 1,025 kg/m³ × 音速約 1,500 m/s）と、物理の教科書の境目の式で計算したもので、測った値ではありません。</span>
+  <span>このページは「<a href="../ultrasound-without-gel/">ゼリーなしの超音波</a>」から広げた思考実験です。4 章の土台（事実）は NOAA の「<span lang="en">Ocean Noise</span>」「<span lang="en">A Whale’s World of Sound</span>」「<span lang="en">What is sonar?</span>」と、NOAA の 2012 年 8 月 15 日の発表（セミクジラの声が届く範囲）によります（2026-11-22 確認）。数字は、空気と海水の音響インピーダンス（空気 約 415 Rayl、海水は密度約 1,025 kg/m³ × 音速約 1,500 m/s）と、物理の教科書の境目の式で計算したもので、測った値ではありません。</span>
   <span>このページは AI（Claude）が書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
 </footer>
 </main>
