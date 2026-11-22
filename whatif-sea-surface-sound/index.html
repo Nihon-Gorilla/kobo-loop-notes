@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="超音波のゼリーの考え方を海の大きさまで広げる思考実験。空気と海の境目で跳ね返る音を、間にはさむ層でどこまで通せるかを動かして確かめます。">
+<meta property="og:title" content="もしも海の表面が音を通したら">
+<meta property="og:description" content="空気と海の境目では音の99.9%が跳ね返ります。どの高さの音も通す膜で海を覆えたら？（もしもシリーズ）">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>もしも海面が音を通したら</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート「もしも」シリーズ。広い画面は左に目次、本文は 1 段。海の水 = 深い青（--giant）、地上・安全側 = 青緑（--comp）。動きは Corporate：easing (0.2,0,0,1)、150/280/450ms */
+:root{
+  --paper:#f4f4f2; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#1d4ed8; --giant-bg:#eaf0fb; --comp:#0f766e; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#7aa7ff; --giant-bg:#121b2e; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#7aa7ff; --giant-bg:#121b2e; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+/* 日本語組版（jp-design）：禁則、約物詰め、和欧間、見出しの文節改行 */
+:root{--ease:cubic-bezier(.2,0,0,1);--t-quick:150ms;--t-std:280ms;--t-slow:450ms}
+main{line-break:strict;overflow-wrap:anywhere;font-feature-settings:"palt" 1;line-height:1.85}
+main code,main table,.eq,.lab output,.readout b{font-feature-settings:normal}
+@supports (text-autospace:normal){main{text-autospace:normal}}
+@supports (text-spacing-trim:normal){main{text-spacing-trim:normal}}
+@supports (word-break:auto-phrase){h1,h2,h3{word-break:auto-phrase}}
+em{font-style:normal}
+.chip{transition:border-color var(--t-quick) var(--ease),color var(--t-quick) var(--ease),transform var(--t-quick) var(--ease)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+/* ui-review で直した点：押しやすさ（44px）、小さい文字のコントラスト */
+.chip{min-height:44px}
+.meta,nav.toc b{color:var(--soft)}
+.lab input[type=range]{min-height:32px}
+.lab canvas{max-width:560px}
+.meter{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.meter .track{position:relative;height:12px;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.meter .fill{height:100%;transition:width var(--t-quick) linear}
+.meter .lim{position:absolute;top:-2px;bottom:-2px;border-left:2px dashed var(--ink);opacity:.6}
+.meter b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-weight:600;min-width:6em;text-align:right}
+.status{font-weight:700}
+.status.bad{color:var(--bad)} .status.ok{color:var(--comp)}
+.series{display:inline-block;font-family:var(--f-data);font-size:12px;letter-spacing:.14em;color:var(--giant);border:1px solid var(--giant);border-radius:2px;padding:0 8px;margin-bottom:10px}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.big div{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.big span{font-size:13px;color:var(--soft)}
+.big b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;line-height:1.3;font-feature-settings:normal}
+.big small{font-size:12.5px;color:var(--soft)}
+</style>
+</head><body>
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">ニュースから「もしも」へ</a></li>
+    <li><a href="#s2">空気と海のあいだ</a></li>
+    <li><a href="#s3">間に 1 枚はさむ</a></li>
+    <li><a href="#s4">もしも海面が音を通したら</a></li>
+    <li><a href="#s5">どこからが仮定か</a></li>
+    <li><a href="#s6">計算のしかた</a></li>
+    <li><a href="#s7">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <span class="series">もしもシリーズ</span>
+  <h1>もしも<em>海の表面</em>が<br>音を通したら</h1>
+  <p>超音波検査のゼリーは、装置と肌のすき間を埋めて音を通します。では、空気と海のあいだにも「音のゼリー」を敷けたらどうなるでしょう。ニュースで読んだ仕組みを土台に、制約を外して海の大きさまで広げてみます。</p>
+  <div class="meta">2026-11-22 版 ・ 読む時間の目安 8 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>ニュースから「もしも」へ</h2>
+  <p>この記事は「<a href="../ultrasound-without-gel/">ゼリーなしの超音波</a>」の続きです。そこで分かったことは 2 つでした。</p>
+  <ul>
+    <li>音は、<strong>性質（音響インピーダンス）の違う物の境目で跳ね返る</strong>。違いが大きいほど、たくさん跳ね返る。</li>
+    <li>ゼリーは、装置と肌のすき間に入りこんだ空気を追い出し、<strong>似た性質どうしをつなぐ</strong>ことで音を通している。</li>
+  </ul>
+  <p>ここからは現実の研究を離れます。「境目の跳ね返りをなくす」という考え方だけを持ち出して、どこまで大きくできるかを試します。</p>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>空気と海のあいだ</h2>
+  <p>空気と海水では、音響インピーダンスが約 3,700 倍も違います。肌と装置のすき間に空気が入るのと同じで、海の表面は音をほとんど跳ね返す「鏡」になっています。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>もの</th><th>音響インピーダンス</th></tr></thead>
+    <tbody>
+      <tr><td>空気（20 ℃）</td><td class="n">約 415 Rayl</td></tr>
+      <tr><td>海水</td><td class="n">約 1,540,000 Rayl</td></tr>
+    </tbody>
+  </table></div>
+  <p>この差だと、空気から海へ（または海から空気へ）まっすぐ当たった音のうち、<strong>通り抜けるのは約 0.1 %</strong>。残りの 99.9 % は跳ね返ります。</p>
+  <div class="key"><b>KEY</b>海の中の音が浜辺でほとんど聞こえないのも、船の上の声が海の中に届きにくいのも、この境目の跳ね返りが大きな理由の一つです。</div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>間に 1 枚はさむ</h2>
+  <p>性質がかけ離れた 2 つをつなぐときは、<strong>ちょうど中間の性質の層</strong>を 1 枚はさむ方法があります。超音波の装置の先にも実際に使われている工夫で、整合層と呼ばれます。</p>
+  <p>ただし、この層がうまく働くのは、層の厚さが音の波長の 4 分の 1 になる高さの音だけです。高さが 2 倍の音では、層がないのと同じになってしまいます。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 空気と海のあいだの層</b>
+    <div class="row" role="group" aria-label="層の種類">
+      <button class="chip" data-m="none">層なし</button>
+      <button class="chip" data-m="q" aria-pressed="true">整合層（1 枚）</button>
+      <button class="chip" data-m="ideal">もしも素材</button>
+    </div>
+    <div class="row"><label for="f0">整合層を合わせる高さ</label><input type="range" id="f0" min="0" max="100" value="50"><output id="f0-o">1,000 Hz</output></div>
+    <canvas id="tc" width="520" height="330" aria-label="音の高さごとの、海に届く音の割合のグラフ"></canvas>
+    <div class="big" aria-live="polite">
+      <div><span>500 Hz の音が海に届く割合</span><b id="o1">—</b></div>
+      <div><span>1,000 Hz</span><b id="o2">—</b></div>
+      <div><span>2,000 Hz</span><b id="o3">—</b></div>
+    </div>
+    <p class="note">縦軸は目盛り 1 つで 10 倍。空気と海水の値は 2 章、整合層は中間の音響インピーダンス（約 25,000 Rayl）で、層の中の音速を 100 m/s とした計算です。「もしも素材」は、どの高さの音も 100 % 通す、現実にはない素材です。</p>
+  </div>
+  <p>整合層を 1 枚はさむと、合わせた高さの音だけは 100 % 通ります。けれども少し高さがずれると、すぐに 0.1 % 近くまで戻ります（3 倍、5 倍…の高さでまた通るのは、層の厚さが波長の 4 分の 3、4 分の 5…にも当たるからです）。人の声や音楽のように、いろいろな高さが混ざった音をまるごと通すのは、1 枚の層では無理です。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>もしも海面が音を通したら</h2>
+  <p>ここで制約を外します。<strong>どの高さの音も 100 % 通す、薄い膜</strong>があって、それで海の表面を覆えたとします。</p>
+  <div class="big">
+    <div><span>海に届く音のエネルギー</span><b>約 930 倍</b><small>0.1 % → 100 %</small></div>
+    <div><span>音の大きさ（デシベル）</span><b>約 +30 dB</b><small>境目を通る分だけで比べて</small></div>
+  </div>
+  <p>30 dB は、エネルギーで約 1,000 倍の違いです。境目で失われていた分がそのまま届くので、こんなことが起きるはずです。</p>
+  <ul>
+    <li><strong>浜辺で海の中が「聞こえる」</strong>：波の下の音が、今より 30 dB 近く大きく空気中に出てきます。</li>
+    <li><strong>海の中が騒がしくなる</strong>：反対に、地上の車や人の声、雷の音も、海の中にずっと多く入ります。今の海は、海面のおかげで地上の音から守られているとも言えます。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>届く音が増えるのは境目の分だけです。遠くへ行くほど音が弱まる分や、波の音などのまわりの音は、この計算に入れていません。</div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>どこからが仮定か</h2>
+  <dl>
+    <dt>本当のこと</dt><dd>境目で音が跳ね返ること、空気と海水の音響インピーダンスの値、整合層の考え方と「4 分の 1 波長の高さだけで働く」こと（物理の教科書の内容）。ゼリーなしの超音波の研究そのもの（<a href="../ultrasound-without-gel/">前の記事</a>）。</dd>
+    <dt>仮定</dt><dd>どの高さの音も 100 % 通す膜があること。それで海の表面を覆えること。波や泡で海面が乱れないこと。音が海面にまっすぐ当たること。</dd>
+    <dt>研究との関係</dt><dd>MIT などの新素材は、体と装置という「近い性質どうし」をつなぐ素材です。空気と海をつなぐ素材ではありません。この記事の膜は、研究から考え方だけを借りた想像です。</dd>
+  </dl>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>計算のしかた</h2>
+  <p>空気の音響インピーダンスを Z₁、海水を Z₃ とします。まっすぐ当たった音のうち、境目を通り抜けるエネルギーの割合は次の式です。</p>
+  <p class="eq">T = 4 Z₁ Z₃ ÷ (Z₁ + Z₃)²   ≈ 0.0011（約 0.1 %）</p>
+  <p>あいだに音響インピーダンス Z₂、厚さ L の層を 1 枚はさむと、波数を k（2π × 高さ ÷ 層の中の音速）として次のようになります。</p>
+  <p class="eq">T = 4 Z₁ Z₃ ÷ [ (Z₁ + Z₃)² cos²(kL) + (Z₂ + Z₁Z₃ ÷ Z₂)² sin²(kL) ]</p>
+  <p>Z₂ = √(Z₁ Z₃) ≈ 25,000 Rayl にして、kL がちょうど 90°（厚さが 4 分の 1 波長）になる高さで T = 1（100 %）になります。kL が 180° になる 2 倍の高さでは、層がないときと同じ値に戻ります。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>用語集</h2>
+  <dl>
+    <dt>音響インピーダンス</dt><dd>物の中での音の伝わりにくさを表す数字。密度 × 音速で求める。単位は Rayl（レイル）。</dd>
+    <dt>整合層</dt><dd>性質の違う 2 つの物のあいだにはさんで、境目の跳ね返りを減らす層。超音波の装置などで使われる。</dd>
+    <dt>デシベル（dB）</dt><dd>音の大きさの比べ方。10 dB 増えるとエネルギーは 10 倍、30 dB で 1,000 倍。</dd>
+  </dl>
+</section>
+
+<footer>
+  <span>このページは「<a href="../ultrasound-without-gel/">ゼリーなしの超音波</a>」から広げた思考実験です。数字は、空気と海水の音響インピーダンス（空気 約 415 Rayl、海水は密度約 1,025 kg/m³ × 音速約 1,500 m/s）と、物理の教科書の境目の式で計算したもので、測った値ではありません。</span>
+  <span>このページは AI（Claude）が書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const Z1 = 415, Z3 = 1025 * 1500, Z2 = Math.sqrt(Z1 * Z3), C2 = 100;
+const T0 = 4 * Z1 * Z3 / (Z1 + Z3) ** 2;
+let mode = 'q', f0 = 1000, shown = 1;
+const Tq = f => { const kL = Math.PI / 2 * f / f0, c = Math.cos(kL) ** 2, s = Math.sin(kL) ** 2; return 4 * Z1 * Z3 / ((Z1 + Z3) ** 2 * c + (Z2 + Z1 * Z3 / Z2) ** 2 * s); };
+const T = f => mode === 'none' ? T0 : mode === 'ideal' ? 1 : Tq(f);
+const pct = t => t >= 0.995 ? '100 %' : t >= 0.1 ? (t * 100).toFixed(0) + ' %' : t >= 0.01 ? (t * 100).toFixed(1) + ' %' : (t * 100).toFixed(2) + ' %';
+const c = $('tc'), g = c.getContext('2d'), W = c.width, H = c.height, L = 70, R = 14, TOP = 24, BOT = 56;
+const X = f => L + (W - L - R) * (Math.log10(f) - 2) / 2;
+const Y = t => TOP + (H - TOP - BOT) * (-Math.log10(Math.max(t, 1e-4))) / 4;
+function draw(p){
+  g.clearRect(0, 0, W, H); g.font = '17px sans-serif'; g.lineWidth = 1;
+  [1, 1e-1, 1e-2, 1e-3, 1e-4].forEach((t, i) => { const y = Y(t); g.strokeStyle = css('--rule'); g.beginPath(); g.moveTo(L, y); g.lineTo(W - R, y); g.stroke(); g.fillStyle = css('--soft'); g.textAlign = 'right'; g.fillText(['100%', '10%', '1%', '0.1%', '0.01%'][i], L - 8, y + 6); });
+  g.textAlign = 'center'; [[100, '100'], [1000, '1k'], [10000, '10k Hz']].forEach(([f, s]) => g.fillText(s, Math.min(X(f), W - 40), H - 26));
+  g.fillText('音の高さ →', (L + W) / 2, H - 4);
+  // 層なしの線（いつも薄く描いて比べる）
+  g.strokeStyle = css('--faint'); g.setLineDash([6, 5]); g.lineWidth = 2; g.beginPath(); g.moveTo(L, Y(T0)); g.lineTo(W - R, Y(T0)); g.stroke(); g.setLineDash([]);
+  g.fillStyle = css('--soft'); g.textAlign = 'left'; g.fillText('層なし', L + 6, Y(T0) - 8);
+  // 選んだ層の線（左から p の割合まで描く）
+  g.strokeStyle = css('--giant'); g.lineWidth = 3; g.beginPath();
+  const N = 400;
+  for (let i = 0; i <= N * p; i++) { const f = 10 ** (2 + 2 * i / N), x = X(f), y = Y(T(f)); i ? g.lineTo(x, y) : g.moveTo(x, y); }
+  g.stroke();
+  if (mode === 'q') { const x = X(f0); g.strokeStyle = css('--ink'); g.globalAlpha = .4; g.beginPath(); g.moveTo(x, TOP); g.lineTo(x, H - BOT); g.stroke(); g.globalAlpha = 1; }
+}
+let raf;
+function render(){
+  cancelAnimationFrame(raf);
+  $('f0-o').textContent = Math.round(f0).toLocaleString('ja-JP') + ' Hz';
+  $('o1').textContent = pct(T(500)); $('o2').textContent = pct(T(1000)); $('o3').textContent = pct(T(2000));
+  document.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === mode)));
+  $('f0').disabled = mode !== 'q';
+  if (reduce) return draw(1);
+  let p = 0; const step = () => { p = Math.min(1, p + 0.06); draw(p); if (p < 1) raf = requestAnimationFrame(step); }; step();
+}
+$('f0').addEventListener('input', e => { f0 = 200 * 25 ** (e.target.value / 100); f0 = Math.round(f0 / 10) * 10; cancelAnimationFrame(raf); $('f0-o').textContent = f0.toLocaleString('ja-JP') + ' Hz'; $('o1').textContent = pct(T(500)); $('o2').textContent = pct(T(1000)); $('o3').textContent = pct(T(2000)); draw(1); });
+document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => { mode = b.dataset.m; render(); }));
+render();
+</script>
+</body></html>
