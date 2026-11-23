@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="暗号を破るための格子の道具で、フェルミ望遠鏡の15年分の公開データから見逃されていたパルサーが見つかりました。まばらな光から回転を当てる「折りたたみ」を動かして確かめます。">
+<meta property="og:title" content="暗号を破る道具で見つけた星">
+<meta property="og:description" content="1コアで600年かかる探索が約10時間に。格子の最短ベクトル問題でパルサーを見つけた研究（PRL 2026）。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>暗号の道具で見つけた星</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。パルサーの信号 = 紫（--giant）、合っている・そろった = 青緑（--comp）。動きは Corporate：easing (0.2,0,0,1)、150/280/450ms */
+:root{
+  --paper:#f4f4f2; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#6d28d9; --giant-bg:#f2eefb; --comp:#0f766e; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#b79cff; --giant-bg:#1c1530; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#b79cff; --giant-bg:#1c1530; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+/* 日本語組版（jp-design）：禁則、約物詰め、和欧間、見出しの文節改行 */
+:root{--ease:cubic-bezier(.2,0,0,1);--t-quick:150ms;--t-std:280ms;--t-slow:450ms}
+main{line-break:strict;overflow-wrap:anywhere;font-feature-settings:"palt" 1;line-height:1.85}
+main code,main table,.eq,.lab output,.readout b{font-feature-settings:normal}
+@supports (text-autospace:normal){main{text-autospace:normal}}
+@supports (text-spacing-trim:normal){main{text-spacing-trim:normal}}
+@supports (word-break:auto-phrase){h1,h2,h3{word-break:auto-phrase}}
+em{font-style:normal}
+.chip{transition:border-color var(--t-quick) var(--ease),color var(--t-quick) var(--ease),transform var(--t-quick) var(--ease)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+/* ui-review で直した点：押しやすさ（44px）、小さい文字のコントラスト */
+.chip{min-height:44px}
+.meta,nav.toc b{color:var(--soft)}
+.lab input[type=range]{min-height:32px}
+.lab canvas{max-width:560px}
+.meter{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.meter .track{position:relative;height:12px;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.meter .fill{height:100%;transition:width var(--t-quick) linear}
+.meter .lim{position:absolute;top:-2px;bottom:-2px;border-left:2px dashed var(--ink);opacity:.6}
+.meter b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-weight:600;min-width:6em;text-align:right}
+.status{font-weight:700}
+.status.bad{color:var(--bad)} .status.ok{color:var(--comp)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.big div{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.big span{font-size:13px;color:var(--soft)}
+.big b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;line-height:1.3;font-feature-settings:normal}
+.big small{font-size:12.5px;color:var(--soft)}
+figure{margin:0;display:flex;flex-direction:column;gap:6px}
+figure svg{width:100%;max-width:520px;height:auto;margin:0 auto;display:block;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+figcaption{font-size:13.5px;color:var(--soft)}
+</style>
+</head><body>
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が見つかったか</a></li>
+    <li><a href="#s2">パルサーと、まばらな光</a></li>
+    <li><a href="#s3">回転の速さを当てる</a></li>
+    <li><a href="#s4">なぜ何百年もかかるのか</a></li>
+    <li><a href="#s5">暗号の道具に言い換える</a></li>
+    <li><a href="#s6">これから</a></li>
+    <li><a href="#s7">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1><em>暗号を破る道具</em>で<br>見つけた星</h1>
+  <p>宇宙望遠鏡の 15 年分の公開データから、それまで見逃されていた高速回転する星（パルサー）が見つかりました。決め手は、暗号を破るために作られた計算の道具です。従来なら 1 コアで 600 年かかる計算が、約 10 時間で済んだといいます。なぜ星探しにそんな計算が要るのかを、前提知識なしで順番に説明します。</p>
+  <div class="meta">2026-11-23 版 ・ 読む時間の目安 10 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が見つかったか</h2>
+  <ul>
+    <li>ドイツのマックス・プランク重力物理学研究所（<span lang="en">AEI</span>）、イスラエルのワイツマン科学研究所、スウェーデンのチャルマース工科大学のチームが、NASA のフェルミ・ガンマ線宇宙望遠鏡の 15 年分の公開データから、新しいパルサー <span lang="en">PSR J1622−7204</span> を見つけました。<strong>1 秒に 261 回</strong>回っています。</li>
+    <li>論文は 2026 年 11 月 19 日に <span lang="en">Physical Review Letters</span> に載りました（筆頭著者は Daniel Pook-Kolb さん）。</li>
+    <li>探し方を「高い次元の格子の中で、いちばん短い矢印を探す」という幾何の問題に言い換え、暗号の研究者が作った道具で解きました。</li>
+    <li>計算は、ふつうの CPU 1 コアで約 10 時間分。チームの従来の方法では 1 コアで 600 年分の計算をかけても見つかりませんでした。AEI と NASA は「約 100 万倍速い」と説明しています。</li>
+  </ul>
+  <div class="key"><b>KEY</b>新しい望遠鏡ではなく、<strong>誰でも使える公開データ</strong>と<strong>探し方の工夫</strong>で見つけた星です。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>パルサーと、まばらな光</h2>
+  <p>パルサーは、とても重い星が燃え尽きたあとに残る、小さく密度の高い星（中性子星）です。速く回りながら、灯台のように光（電波やガンマ線）を一方向に出していて、地球の方を向くたびに光が届きます。</p>
+  <p>ところが、ガンマ線の光は<strong>とてもまばら</strong>にしか届きません。NASA は「フェルミが一つのパルサーからとらえる光子はごくわずか」と説明しています。今回の発見に使った光子は約 16,000 個で、15 年分です。1 秒に 261 回まわる星なので、回っている回数に比べて、届いた光はほんのわずかです。</p>
+  <p>Pook-Kolb さんは「パルサーが回るたびに光が見えるわけではないので、回転を数えて光子の出どころを割り出すことはできない」と話しています。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>回転の速さを当てる</h2>
+  <p>まばらな光から回転を見つけるには、「1 秒に何回まわっているか」を仮に決めて、光が届いた時刻を 1 回転ぶんに<strong>折りたたんで重ねる</strong>方法があります。仮の速さが正しければ、光は回転の同じ位置に集まります。間違っていれば、ばらばらに散らばります。</p>
+  <div class="lab">
+    <b>触って確かめる ・ 折りたたんで重ねる（模型）</b>
+    <div class="row" role="group" aria-label="観測の長さ">
+      <span>観測の長さ</span>
+      <button class="chip" data-t="60">60 秒</button>
+      <button class="chip" data-t="240" aria-pressed="true">240 秒</button>
+      <button class="chip" data-t="960">960 秒</button>
+    </div>
+    <div class="row"><label for="fr">仮の回転の速さ</label><input type="range" id="fr" min="0" max="400" value="100"><output id="fr-o">4.9500 回/秒</output></div>
+    <canvas id="hist" width="520" height="220" aria-label="光の届いた時刻を 1 回転に折りたたんだヒストグラム"></canvas>
+    <div class="row"><button class="chip" id="scan">端から端まで試す</button><span class="note" id="scan-n"></span></div>
+    <canvas id="scanc" width="520" height="200" aria-label="試した速さごとの、光のそろい具合のグラフ"></canvas>
+    <div class="big" aria-live="polite">
+      <div><span>光のそろい具合</span><b id="o-z">—</b><small>ばらばらなら 1 前後</small></div>
+      <div><span>試す刻みの目安</span><b id="o-step">—</b><small>1 ÷ 観測の長さ</small></div>
+      <div><span>この範囲で試す回数</span><b id="o-n">—</b><small>4.9〜5.1 回/秒の中で</small></div>
+    </div>
+    <p class="note">1 秒に 5 回まわる、作り物のパルサーです（本物の 261 回/秒ではありません）。光は平均 12 回転に 1 回ほど届き、同じくらいの数の関係ない光（雑音）も混ぜています。そろい具合は、折りたたんだ位置がどれだけ一か所に集まっているかを表す、よく使われる指標（レイリー検定）です。</p>
+  </div>
+  <p>観測が長いほど、正しい速さのところで光はよくそろいます。けれども山は<strong>どんどん細く</strong>なり、少しでもずれると見えなくなります。そのぶん、細かい刻みで、たくさんの速さを試さなければなりません。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>なぜ何百年もかかるのか</h2>
+  <p>試す刻みの目安は「1 ÷ 観測の長さ」です。15 年は約 4.7 億秒なので、刻みは約 0.000000002 回/秒になります。これで例えば 0〜1,000 回/秒を順に試すと、それだけで約 5,000 億通りです（目安の計算）。</p>
+  <p>本物の探索では、これに加えて、回転がだんだん遅くなる割合と、空のどこにあるか（位置）も一緒に当てる必要があります。Pook-Kolb さんは「4 次元の格子があって、それぞれの方向に何百万もの試行が要る」と話しています。</p>
+  <div class="key"><b>KEY</b>1 つずつ試す方法だと、試す組み合わせが掛け算で増えていきます。これが、従来の方法で 1 つのパルサーを見つけるのに何百年分もの計算が要った理由です。</div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>暗号の道具に言い換える</h2>
+  <p>チームは、この探索を「高い次元の<strong>格子</strong>の中で、いちばん短い矢印（最短ベクトル）を探す」問題に言い換えました。格子とは、碁盤の目の交点のように、決まった矢印の組み合わせで規則正しく並んだ点の集まりです。</p>
+  <figure>
+    <svg viewBox="0 0 520 300" role="img" aria-label="格子の点と、与えられた長い矢印 2 本、いちばん短い矢印">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="context-stroke"/></marker></defs>
+<circle cx="26.0" cy="98.0" r="3.2" fill="var(--soft)"/>
+<circle cx="52.0" cy="150.0" r="3.2" fill="var(--soft)"/>
+<circle cx="78.0" cy="202.0" r="3.2" fill="var(--soft)"/>
+<circle cx="104.0" cy="46.0" r="3.2" fill="var(--soft)"/>
+<circle cx="104.0" cy="254.0" r="3.2" fill="var(--soft)"/>
+<circle cx="130.0" cy="98.0" r="3.2" fill="var(--soft)"/>
+<circle cx="156.0" cy="150.0" r="3.2" fill="var(--soft)"/>
+<circle cx="182.0" cy="202.0" r="3.2" fill="var(--soft)"/>
+<circle cx="208.0" cy="46.0" r="3.2" fill="var(--soft)"/>
+<circle cx="208.0" cy="254.0" r="3.2" fill="var(--soft)"/>
+<circle cx="234.0" cy="98.0" r="3.2" fill="var(--soft)"/>
+<circle cx="260.0" cy="150.0" r="3.2" fill="var(--soft)"/>
+<circle cx="286.0" cy="202.0" r="3.2" fill="var(--soft)"/>
+<circle cx="312.0" cy="46.0" r="3.2" fill="var(--soft)"/>
+<circle cx="312.0" cy="254.0" r="3.2" fill="var(--soft)"/>
+<circle cx="338.0" cy="98.0" r="3.2" fill="var(--soft)"/>
+<circle cx="364.0" cy="150.0" r="3.2" fill="var(--soft)"/>
+<circle cx="390.0" cy="202.0" r="3.2" fill="var(--soft)"/>
+<circle cx="416.0" cy="46.0" r="3.2" fill="var(--soft)"/>
+<circle cx="416.0" cy="254.0" r="3.2" fill="var(--soft)"/>
+<circle cx="442.0" cy="98.0" r="3.2" fill="var(--soft)"/>
+<circle cx="468.0" cy="150.0" r="3.2" fill="var(--soft)"/>
+<circle cx="494.0" cy="202.0" r="3.2" fill="var(--soft)"/>
+<line x1="260.0" y1="150.0" x2="442.0" y2="98.0" stroke="var(--giant)" stroke-width="2.5" marker-end="url(#ah)"/>
+<line x1="260.0" y1="150.0" x2="520.0" y2="46.0" stroke="var(--giant)" stroke-width="2.5" marker-end="url(#ah)"/>
+<line x1="260.0" y1="150.0" x2="286.0" y2="202.0" stroke="var(--comp)" stroke-width="4" marker-end="url(#ah)"/>
+<circle cx="260.0" cy="150.0" r="5" fill="var(--ink)"/>
+<text x="448.0" y="90.0" font-size="15" fill="var(--giant)" text-anchor="end">与えられた矢印</text>
+<text x="296.0" y="220.0" font-size="15" fill="var(--comp)" font-weight="700">いちばん短い矢印</text>
+</svg>
+    <figcaption>2 次元の格子の例。紫の 2 本の矢印を足し引きして作れる点が並んでいます。与えられた矢印は長くても、いちばん短い矢印（青緑）は別にあります。次元が高くなると、これを探すのはとても難しくなります。</figcaption>
+  </figure>
+  <p>いちばん短い矢印を探すのが難しいことは、<strong>将来の量子コンピュータでも破れないように作られた暗号</strong>の安全さの土台になっています。そのため暗号の研究者は、この暗号を破ろうとして、格子の短い矢印を探す道具を磨いてきました。チームはその道具を借りました。</p>
+  <p>共著者の Dotan Gazith さんは「私たちの分析は暗号とは関係ないが、その道具がデータからパルサーを探す問題を解くのに役立つ」と話しています。</p>
+  <div class="key warn"><b>NOTE</b>どうやってパルサー探しを格子の問題に変えたのか、具体的な式は論文にあります。この記事は NASA と AEI の発表をもとにしていて、論文本文は読んでいません。暗号が破られたという話でもありません。</div>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>これから</h2>
+  <ul>
+    <li><strong>公開データの探し直し</strong>：チームは、フェルミの公開データから同じような高速回転のパルサーをさらに探すとしています。グループリーダーの Colin Clark さんは「データの中に、これまで見つけられなかったパルサーが何十、もしかすると何百もある」と話しています。</li>
+    <li><strong>連星のパルサー</strong>：別の星のまわりを回るパルサーは、相手の星の重力で信号がゆがみ、従来の方法ではほぼ見つけられませんでした。これを探すには、ずっと多くの計算が要るとしています。</li>
+  </ul>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>用語集</h2>
+  <dl>
+    <dt>パルサー</dt><dd>速く回りながら、灯台のように一方向に光を出す中性子星。</dd>
+    <dt>光子</dt><dd>光の粒。ガンマ線は、とてもエネルギーの高い光。</dd>
+    <dt>折りたたみ</dt><dd>光の届いた時刻を、仮の回転周期で割った余り（回転のどの位置か）にそろえて重ねること。</dd>
+    <dt>格子</dt><dd>いくつかの矢印を整数倍して足し合わせた点が、規則正しく並んだもの。</dd>
+    <dt>耐量子暗号</dt><dd>量子コンピュータが実用になっても破られにくいように作られた暗号。格子の問題の難しさを使うものがある。</dd>
+  </dl>
+</section>
+
+<footer>
+  <span>事実の出どころ：NASA「<span lang="en">NASA Science Data Powers New Method to Discover Hard-to-Find Pulsars</span>」と AEI「<span lang="en">Finding gamma-ray pulsars a million times faster</span>」（ともに 2026-11-19 公開、2026-11-22 確認）。論文：Pook-Kolb ほか「<span lang="en">Gamma-ray pulsar discovery using a lattice-based method</span>」<span lang="en">Physical Review Letters</span>（2026）、DOI 10.1103/vlt2-xzgk。論文本文は読んでいません。3 章の模型と 4 章の「約 5,000 億通り」は説明のための目安の計算で、論文の値ではありません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const F0 = 5.0, LO = 4.9, HI = 5.1, BINS = 24;
+let T = 240, fr = 4.95, photons = [], scan = [];
+function rng(seed){ return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
+function make(){
+  const r = rng(7), out = [];
+  const nP = Math.round(T * F0 / 12), nB = nP;
+  for (let i = 0; i < nP; i++) { const k = Math.floor(r() * T * F0); let g = 0; for (let j = 0; j < 6; j++) g += r(); out.push((k + 0.3 + (g - 3) * 0.05) / F0); }
+  for (let i = 0; i < nB; i++) out.push(r() * T);
+  photons = out.filter(t => t >= 0 && t <= T);
+}
+const phases = f => photons.map(t => (t * f) % 1);
+const zscore = f => { let c = 0, s = 0; for (const t of photons) { const a = 2 * Math.PI * t * f; c += Math.cos(a); s += Math.sin(a); } return (c * c + s * s) / photons.length; };
+function drawHist(){
+  const c = $('hist'), g = c.getContext('2d'), W = c.width, H = c.height, L = 14, B = 34;
+  const h = new Array(BINS).fill(0); phases(fr).forEach(p => h[Math.floor(p * BINS)]++);
+  const mx = Math.max(10, ...h);
+  g.clearRect(0, 0, W, H); const bw = (W - 2 * L) / BINS;
+  h.forEach((v, i) => { g.fillStyle = css('--giant'); g.globalAlpha = .85; const bh = (H - B - 28) * v / mx; g.fillRect(L + i * bw + 1, H - B - bh, bw - 2, bh); });
+  g.globalAlpha = 1; g.font = '17px sans-serif'; g.fillStyle = css('--soft'); g.textAlign = 'left';
+  g.fillText('回転のはじめ', L, H - 10); g.textAlign = 'right'; g.fillText('1 回転のおわり', W - L, H - 10);
+  g.textAlign = 'left'; g.fillStyle = css('--ink'); g.fillText('光の届いた位置（' + photons.length + ' 個）', L, 22);
+}
+function drawScan(n){
+  const c = $('scanc'), g = c.getContext('2d'), W = c.width, H = c.height, L = 14, B = 34, TOP = 30;
+  g.clearRect(0, 0, W, H); g.font = '17px sans-serif';
+  const X = f => L + (W - 2 * L) * (f - LO) / (HI - LO);
+  const mx = Math.max(20, ...scan.slice(0, n).map(s => s[1]));
+  const Y = z => H - B - (H - B - TOP) * Math.min(1, z / mx);
+  g.strokeStyle = css('--rule'); g.beginPath(); g.moveTo(L, H - B); g.lineTo(W - L, H - B); g.stroke();
+  g.fillStyle = css('--soft'); g.textAlign = 'left'; g.fillText(LO.toFixed(1), L, H - 10); g.textAlign = 'right'; g.fillText(HI.toFixed(1) + ' 回/秒', W - L, H - 10);
+  g.textAlign = 'left'; g.fillStyle = css('--ink'); g.fillText('そろい具合', L, 20);
+  if (n) { g.strokeStyle = css('--comp'); g.lineWidth = 2; g.beginPath(); for (let i = 0; i < n; i++) { const [f, z] = scan[i]; i ? g.lineTo(X(f), Y(z)) : g.moveTo(X(f), Y(z)); } g.stroke(); }
+  g.strokeStyle = css('--giant'); g.lineWidth = 2; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(X(fr), TOP - 6); g.lineTo(X(fr), H - B); g.stroke(); g.setLineDash([]);
+}
+function readout(){
+  $('fr-o').textContent = fr.toFixed(4) + ' 回/秒';
+  $('o-z').textContent = zscore(fr).toFixed(1);
+  $('o-step').textContent = (1 / T).toFixed(4);
+  $('o-n').textContent = '約 ' + Math.round((HI - LO) * T) + ' 回';
+  document.querySelectorAll('.chip[data-t]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.t === T)));
+}
+function all(n){ drawHist(); drawScan(n); readout(); }
+let raf;
+function runScan(){
+  cancelAnimationFrame(raf);
+  const N = 800; scan = []; for (let i = 0; i <= N; i++) { const f = LO + (HI - LO) * i / N; scan.push([f, zscore(f)]); }
+  $('scan-n').textContent = (N + 1) + ' 通りの速さを試しました';
+  if (reduce) return all(scan.length);
+  let n = 0; const step = () => { n = Math.min(scan.length, n + 12); drawScan(n); if (n < scan.length) raf = requestAnimationFrame(step); }; step();
+}
+$('fr').addEventListener('input', e => { fr = LO + (HI - LO) * e.target.value / 400; all(scan.length); });
+$('scan').addEventListener('click', runScan);
+document.querySelectorAll('.chip[data-t]').forEach(b => b.addEventListener('click', () => { T = +b.dataset.t; make(); scan = []; $('scan-n').textContent = ''; cancelAnimationFrame(raf); all(0); }));
+make(); all(0);
+</script>
+</body></html>
