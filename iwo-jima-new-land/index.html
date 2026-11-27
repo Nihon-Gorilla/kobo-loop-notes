@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="硫黄島の沖で海底火山が噴火し、約50ヘクタールの新しい陸地ができました。NASAは同時に、どれだけもつかは分からないとしています。積もる力と削る力の綱引きを触って確かめます。">
+<meta property="og:title" content="島が大きくなった、たぶん数か月だけ">
+<meta property="og:description" content="約50ヘクタールの新しい陸地。3年前の陸地は数週間で消えました。雲ごしに見たレーダー衛星と、作る力と削る力の綱引き。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>消えるかもしれない新しい陸地</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。新しい陸地 = 橙（--giant）、海と波 = 青（--comp）。動きは Corporate：easing (0.2,0,0,1)、150/280/450ms */
+:root{
+  --paper:#f4f4f2; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#9a3412; --giant-bg:#f7eee8; --comp:#0369a1; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#fb923c; --giant-bg:#231512; --comp:#7dd3fc; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#fb923c; --giant-bg:#231512; --comp:#7dd3fc; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+/* 日本語組版（jp-design）：禁則、約物詰め、和欧間、見出しの文節改行 */
+:root{--ease:cubic-bezier(.2,0,0,1);--t-quick:150ms;--t-std:280ms;--t-slow:450ms}
+main{line-break:strict;overflow-wrap:anywhere;font-feature-settings:"palt" 1;line-height:1.85}
+main code,main table,.eq,.lab output,.readout b{font-feature-settings:normal}
+@supports (text-autospace:normal){main{text-autospace:normal}}
+@supports (text-spacing-trim:normal){main{text-spacing-trim:normal}}
+@supports (word-break:auto-phrase){h1,h2,h3{word-break:auto-phrase}}
+em{font-style:normal}
+.chip{transition:border-color var(--t-quick) var(--ease),color var(--t-quick) var(--ease),transform var(--t-quick) var(--ease)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+/* ui-review で直した点：押しやすさ（44px）、小さい文字のコントラスト */
+.chip{min-height:44px}
+.meta,nav.toc b{color:var(--soft)}
+.lab input[type=range]{min-height:32px}
+.lab canvas{max-width:560px}
+.meter{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.meter .track{position:relative;height:12px;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.meter .fill{height:100%;transition:width var(--t-quick) linear}
+.meter .lim{position:absolute;top:-2px;bottom:-2px;border-left:2px dashed var(--ink);opacity:.6}
+.meter b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-weight:600;min-width:6em;text-align:right}
+.status{font-weight:700}
+.status.bad{color:var(--bad)} .status.ok{color:var(--comp)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.big div{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.big span{font-size:13px;color:var(--soft)}
+.big b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;line-height:1.3;font-feature-settings:normal}
+.big small{font-size:12.5px;color:var(--soft)}
+figure{margin:0;display:flex;flex-direction:column;gap:6px}
+figure svg{width:100%;max-width:520px;height:auto;margin:0 auto;display:block;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+figcaption{font-size:13.5px;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が起きたか</a></li>
+    <li><a href="#s2">雲の下を見た衛星</a></li>
+    <li><a href="#s3">50 ヘクタールはどれくらい</a></li>
+    <li><a href="#s4">積もる速さと削られる速さ</a></li>
+    <li><a href="#s5">3 年前は数週間で消えた</a></li>
+    <li><a href="#s6">残った島、消えた島</a></li>
+    <li><a href="#s7">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>島が<em>大きくなった</em>、たぶん数か月だけ</h1>
+  <p>硫黄島の沖で海の底の火山が噴火し、黒い砂の海岸に約 50 ヘクタールの新しい陸地がつながりました。<span lang="en">NASA</span> は同時に、「この陸地がどれだけもつかは分からない」とも書いています。3 年前の同じような陸地は数週間で消えました。作る力と削る力の綱引きを、動かして確かめます。</p>
+  <div class="meta">2026-11-27 版 ・ 読む時間の目安 9 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が起きたか</h2>
+  <ul>
+    <li>硫黄島の南東の浅い海で、海底の火山が噴火しました。地震の活動が急に増えたのが 2026 年 10 月 27 日で、その前後から噴火が始まったと <span lang="en">NASA</span> は書いています。</li>
+    <li>できた新しい陸地はおよそ <strong>50 ヘクタール</strong>（125 エーカー）。<span lang="en">NASA</span> はアメリカンフットボールの競技場 90 面分と言い換え、島の面積が<strong>約 1.7 % 増える</strong>としています。</li>
+    <li>海上保安庁が 11 月 16 日の報告で、新しい陸地ができたことを確かめました。</li>
+    <li>つながった先は、1945 年 2 月 19 日にアメリカ軍が上陸した南東の海岸です。</li>
+  </ul>
+  <div class="key"><b>KEY</b><span lang="en">NASA</span> の記事の見出しのすぐ下には、「この新しい陸地がどれだけ生き延びるかは分からない」と書かれています。増えた話と消えるかもしれない話が、最初からひと組になっています。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>雲の下を見た衛星</h2>
+  <p>今回おもしろいのは、1 機の衛星が全部を見たのではなく、<strong>役割の違う衛星が順番に受け持った</strong>ことです。</p>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>日付</th><th>衛星・センサー</th><th>見えたもの</th></tr></thead>
+    <tbody>
+      <tr><td class="n">10/26</td><td><span lang="en">Landsat 9</span>（<span lang="en">OLI</span>）</td><td>噴火前の静かな海岸</td></tr>
+      <tr><td class="n">10/28</td><td><span lang="en">NISAR</span>（レーダー）</td><td>厚い雲ごしに、海面の大きな乱れ</td></tr>
+      <tr><td class="n">11 月上旬</td><td><span lang="en">MODIS</span>・<span lang="en">VIIRS</span></td><td>噴煙と、熱を示す赤外線の反応</td></tr>
+      <tr><td class="n">11/11</td><td><span lang="en">Landsat 9</span>（<span lang="en">OLI</span>）</td><td>新しい陸地のはっきりした姿、熱の跡、浮かぶ軽石</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>ふつうのカメラは雲があると下を見られません。<span lang="en">NISAR</span> は電波を自分で出して返りを測るレーダーなので、雲も夜も関係なく見えます。だから噴火の 10 月 28 日という早い時点で、海面が荒れている様子を捉えられました。</p>
+  <div class="key"><b>KEY</b><span lang="en">NASA</span> の科学者は、<span lang="en">NISAR</span> が雲ごしに細かく繰り返し観測できるので、この陸地が<strong>削られるのか、沈むのか、育つのか</strong>を追えると言っています。</div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>50 ヘクタールはどれくらい</h2>
+  <p>1 ヘクタールは 100 m × 100 m です。50 ヘクタールは 0.5 平方キロメートル、たとえば 700 m 四方くらいにあたります。島全体の 1.7 % という割合から逆に計算すると、硫黄島の面積はおよそ 29 平方キロメートルということになります。</p>
+  <p>大きく聞こえますが、厚みのほうは分かりません。海底の火山が吐き出した砂や軽石が浅い海を埋めただけなら、海の上に出ている部分はごく薄い可能性があります。薄い陸地は波に弱い。ここが次の章の話です。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>積もる速さと削られる速さ</h2>
+  <div class="lab">
+    <b>触って確かめる ・ 作る力と削る力の綱引き</b>
+    <div class="row"><label for="er">波が削る強さ</label><input type="range" id="er" min="0" max="100" value="45"><output id="er-o">—</output></div>
+    <div class="row"><label for="dr">噴火が続く日数</label><input type="range" id="dr" min="0" max="120" value="20"><output id="dr-o">20 日</output></div>
+    <div class="row" role="group" aria-label="よく使う値">
+      <button class="chip" data-e="70" data-d="20">2023 年のように数週間で消える</button>
+      <button class="chip" data-e="20" data-d="60">噴火が長く続く</button>
+    </div>
+    <canvas id="cv" width="560" height="340" aria-label="新しい陸地の面積が時間とともにどう変わるかのグラフ"></canvas>
+    <div class="big" aria-live="polite">
+      <div><span>いちばん広がったとき</span><b id="o-max">—</b><small>今回は約 50 ヘクタール</small></div>
+      <div><span>そのときの日</span><b id="o-tp">—</b><small>噴火が始まってから</small></div>
+      <div><span>残りが 1 割を切るまで</span><b id="o-gone">—</b><small>波だけが働き続けた場合</small></div>
+    </div>
+    <p class="note">「毎日いくらか積もり、残っている面積に比例して削られる」とだけ決めた、いちばん簡単な模型です。硫黄島の実測値ではありません。削る速さは波の高さや陸地の粒の大きさで変わり、溶岩で固まった部分があればずっと強くなります。</p>
+  </div>
+  <p>この模型でも分かるのは、<strong>広がる時期と消える時期は別の力で決まる</strong>ということです。噴火が止まった瞬間から、残りは波の仕事になります。だから「どれだけ大きくなったか」と「どれだけもつか」は、別々に見るしかありません。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>3 年前は数週間で消えた</h2>
+  <ul>
+    <li>2023 年にも硫黄島の南東の沖で噴火があり、新しい陸地ができましたが、<strong>数週間で波に負けて消えました</strong>。</li>
+    <li>2025 年 8 月には、島の西側でも噴火がありました。</li>
+    <li><span lang="en">NASA</span> ゴダード宇宙飛行センターの研究者は、「数か月のうちに流されるだろうと思う。ただ、待って見るしかない」と話しています。</li>
+  </ul>
+  <div class="key warn"><b>CAUTION</b>ただし <span lang="en">NASA</span> は、今回が前と同じとは限らないとも書いています。火山灰や軽石が中心の噴火なら波に削られやすい一方、<strong>玄武岩質安山岩の溶岩</strong>が注ぎ込まれていれば、2023 年とは違う道をたどる可能性がある、という見立てです。</div>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>残った島、消えた島</h2>
+  <p>噴火でできた陸地が 10 年以上残るのは珍しいことだと <span lang="en">NASA</span> は書き、残った例として<span lang="en">カペリーニョス</span>（ポルトガル・アゾレス諸島）、<span lang="en">スルツェイ</span>（アイスランド）、<span lang="en">マクドナルド島</span>、<span lang="en">ホームリーフ</span>（トンガ）を挙げています。</p>
+  <p><span lang="en">NASA</span> は今後、超高解像度の商用衛星の画像も使って、新しい陸地に溝や割れ目ができていないかを見るとしています。割れ目は、その陸地が固まっているのか、ばらばらの粒が積もっただけなのかの手がかりになります。</p>
+  <div class="key"><b>KOBO LOOP の見方</b>ニュースは「島が大きくなった」で止まりがちですが、この話の中身は<strong>一度の出来事ではなく、これから数か月の観測の計画</strong>です。衛星の価値は、1 枚の写真より、同じ場所を何度も撮れることのほうにあります。</div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>用語集</h2>
+  <dl>
+    <dt>ヘクタール</dt><dd>100 m × 100 m の広さ。1 ヘクタール = 0.01 平方キロメートル。</dd>
+    <dt>合成開口レーダー（<span lang="en">SAR</span>）</dt><dd>電波を出して返りを測る観測。雲や夜に関係なく地面や海面を見られる。<span lang="en">NISAR</span> は <span lang="en">NASA</span> とインド宇宙研究機関が一緒に作った衛星。</dd>
+    <dt>短波赤外（<span lang="en">SWIR</span>）</dt><dd>目に見える光より波長の長い光。熱いものがよく写るので、噴火の熱の跡が分かる。</dd>
+    <dt>軽石</dt><dd>泡をたくさん含んだ軽い火山の石。水に浮いて海を漂うことがある。</dd>
+    <dt>玄武岩質安山岩</dt><dd>火山の溶岩の種類のひとつ。固まると粒の積もった地面より丈夫になる。</dd>
+  </dl>
+</section>
+
+<footer>
+  <span>事実の出どころ：<span lang="en">NASA Earth Observatory</span>「<span lang="en">Eruption Extends Iwo Jima's Beach</span>」（2026-11-24、2026-11-27 確認） https://science.nasa.gov/earth/earth-observatory/eruption-extends-iwo-jimas-beach/ 。島の面積約 29 平方キロメートルは「50 ヘクタールで約 1.7 % 増」からこの記事で割り戻した目安です。4 章の模型は、積もる量と削られる量を単純に決めただけのもので、硫黄島の実測値ではありません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DAYS = 240, SUPPLY = 5; // 1 日に積もる面積（ヘクタール）
+let er = 45, dur = 20, shown = 0, raf;
+function series(){
+  const k = er / 100 * 0.12, a = []; let A = 0;
+  for (let d = 0; d <= DAYS; d++) { a.push(A); A = Math.max(0, A + (d < dur ? SUPPLY : 0) - A * k); }
+  return a;
+}
+function stats(a){
+  let mx = 0, tp = 0;
+  a.forEach((v, i) => { if (v > mx) { mx = v; tp = i; } });
+  let gone = -1;
+  for (let i = tp; i < a.length; i++) if (a[i] < mx * 0.1) { gone = i; break; }
+  return {mx, tp, gone};
+}
+function draw(frac){
+  const c = $('cv'), g = c.getContext('2d'), W = c.width, H = c.height;
+  const L = 62, R = W - 14, T = 16, B = H - 50, a = series(), s = stats(a);
+  const YMAX = 80, X = d => L + d / DAYS * (R - L), Y = v => B - Math.min(v, YMAX) / YMAX * (B - T);
+  g.clearRect(0, 0, W, H); g.font = '19px sans-serif'; g.lineWidth = 1;
+  g.strokeStyle = css('--rule'); g.fillStyle = css('--soft'); g.textAlign = 'right';
+  for (let v = 0; v <= YMAX; v += 20) { g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(R, Y(v)); g.stroke(); g.fillText(v, L - 8, Y(v) + 6); }
+  g.textAlign = 'center';
+  for (let d = 0; d <= DAYS; d += 60) g.fillText(d, X(d), B + 24);
+  g.fillText('噴火が始まってからの日数', (L + R) / 2, B + 46);
+  g.save(); g.translate(16, (T + B) / 2); g.rotate(-Math.PI / 2); g.fillText('ヘクタール', 0, 0); g.restore();
+  // 今回の 50 ヘクタール
+  g.setLineDash([6, 5]); g.strokeStyle = css('--ink'); g.globalAlpha = .5;
+  g.beginPath(); g.moveTo(L, Y(50)); g.lineTo(R, Y(50)); g.stroke(); g.globalAlpha = 1; g.setLineDash([]);
+  g.textAlign = 'left'; g.fillText('今回の約 50 ヘクタール', L + 8, Y(50) - 8);
+  // 噴火が続いた期間
+  if (dur > 0) { g.fillStyle = css('--giant'); g.globalAlpha = .12; g.fillRect(L, T, X(dur) - L, B - T); g.globalAlpha = 1; }
+  // 面積の線
+  const end = Math.round(DAYS * frac);
+  g.strokeStyle = css('--giant'); g.lineWidth = 3; g.beginPath();
+  for (let d = 0; d <= end; d++) { const x = X(d), y = Y(a[d]); d ? g.lineTo(x, y) : g.moveTo(x, y); }
+  g.stroke();
+  if (frac >= 1 && s.gone > 0) {
+    g.fillStyle = css('--comp'); g.beginPath(); g.arc(X(s.gone), Y(a[s.gone]), 6, 0, 7); g.fill();
+    g.textAlign = s.gone > DAYS * .7 ? 'right' : 'left';
+    g.fillText('ほぼ消える', X(s.gone) + (s.gone > DAYS * .7 ? -12 : 12), Y(a[s.gone]) - 10);
+  }
+}
+function update(){
+  const s = stats(series());
+  $('er-o').textContent = er === 0 ? '削られない' : er < 35 ? 'おだやか' : er < 70 ? 'ふつう' : '荒い';
+  $('dr-o').textContent = dur + ' 日';
+  $('o-max').textContent = s.mx < 0.5 ? '—' : Math.round(s.mx) + ' ha';
+  $('o-tp').textContent = s.mx < 0.5 ? '—' : s.tp + ' 日目';
+  $('o-gone').textContent = s.mx < 0.5 ? '—' : s.gone < 0 ? '240 日より先' : s.gone + ' 日目';
+  document.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.e === er && +b.dataset.d === dur)));
+  cancelAnimationFrame(raf);
+  if (reduce) return draw(1);
+  const t0 = performance.now();
+  const step = t => { const k = Math.min(1, (t - t0) / 450); draw(1 - (1 - k) ** 3); if (k < 1) raf = requestAnimationFrame(step); };
+  raf = requestAnimationFrame(step);
+}
+$('er').addEventListener('input', e => { er = +e.target.value; update(); });
+$('dr').addEventListener('input', e => { dur = +e.target.value; update(); });
+document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+  er = +b.dataset.e; dur = +b.dataset.d; $('er').value = er; $('dr').value = dur; update();
+}));
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => draw(1));
+update();
+</script>
+</body>
+</html>
