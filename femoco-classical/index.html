@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="量子コンピュータの代表的な目標だった酵素の心臓部FeMocoの模型を、古典の計算で化学的精度まで見積もった研究が続きました。何が解けて、どこからが言い過ぎかを数を数えて確かめます。">
+<meta property="og:title" content="量子の宿題を古典が先に解く">
+<meta property="og:description" content="76軌道の模型を全部数えると10の45乗通り。古典はどうやって近づいたのか、量子はもういらないのか。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>量子の宿題を古典が解く</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。古典の計算 = 緑（--giant）、量子・全部数える = 青（--comp）。動きは Corporate：easing (0.2,0,0,1)、150/280/450ms */
+:root{
+  --paper:#f4f4f2; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#3f6212; --giant-bg:#eef4e2; --comp:#1d4ed8; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#a3e635; --giant-bg:#1a2410; --comp:#93c5fd; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#a3e635; --giant-bg:#1a2410; --comp:#93c5fd; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+/* 日本語組版（jp-design）：禁則、約物詰め、和欧間、見出しの文節改行 */
+:root{--ease:cubic-bezier(.2,0,0,1);--t-quick:150ms;--t-std:280ms;--t-slow:450ms}
+main{line-break:strict;overflow-wrap:anywhere;font-feature-settings:"palt" 1;line-height:1.85}
+main code,main table,.eq,.lab output,.readout b{font-feature-settings:normal}
+@supports (text-autospace:normal){main{text-autospace:normal}}
+@supports (text-spacing-trim:normal){main{text-spacing-trim:normal}}
+@supports (word-break:auto-phrase){h1,h2,h3{word-break:auto-phrase}}
+em{font-style:normal}
+.chip{transition:border-color var(--t-quick) var(--ease),color var(--t-quick) var(--ease),transform var(--t-quick) var(--ease)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+/* ui-review で直した点：押しやすさ（44px）、小さい文字のコントラスト */
+.chip{min-height:44px}
+.meta,nav.toc b{color:var(--soft)}
+.lab input[type=range]{min-height:32px}
+.lab canvas{max-width:560px}
+.meter{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.meter .track{position:relative;height:12px;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.meter .fill{height:100%;transition:width var(--t-quick) linear}
+.meter .lim{position:absolute;top:-2px;bottom:-2px;border-left:2px dashed var(--ink);opacity:.6}
+.meter b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-weight:600;min-width:6em;text-align:right}
+.status{font-weight:700}
+.status.bad{color:var(--bad)} .status.ok{color:var(--comp)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.big div{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.big span{font-size:13px;color:var(--soft)}
+.big b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;line-height:1.3;font-feature-settings:normal}
+.big small{font-size:12.5px;color:var(--soft)}
+figure{margin:0;display:flex;flex-direction:column;gap:6px}
+figure svg{width:100%;max-width:520px;height:auto;margin:0 auto;display:block;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+figcaption{font-size:13.5px;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が起きたか</a></li>
+    <li><a href="#s2">FeMoco という分子</a></li>
+    <li><a href="#s3">なぜ量子の宿題だったか</a></li>
+    <li><a href="#s4">全部数えると宇宙が終わる</a></li>
+    <li><a href="#s5">古典はどうやって近づいたか</a></li>
+    <li><a href="#s6">量子はもういらない？</a></li>
+    <li><a href="#s7">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>量子の宿題を<em>古典</em>が先に解く</h1>
+  <p>「この分子の計算は、量子コンピュータの出番だ」。そう言われてきた代表選手が、窒素を肥料の形に変える酵素の心臓部 <span lang="en">FeMoco</span> です。2026 年、その標準的な模型を、いまある普通の計算機（古典コンピュータ）で化学の精度まで見積もった、という研究が続けて出ました。何が「解けた」のか、どこからが言い過ぎなのかを、数を数えながら確かめます。</p>
+  <div class="meta">2026-11-27 版 ・ 読む時間の目安 10 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が起きたか</h2>
+  <ul>
+    <li>2026 年 1 月 8 日、ガーネット・チャン氏（カリフォルニア工科大学）らのグループが、論文「<span lang="en">Classical computational simulation of the FeMo-cofactor model to chemical accuracy and its implications</span>」を <span lang="en">arXiv</span> に出しました（6 月に改訂、査読前）。量子コンピュータの目標としてよく使われる <span lang="en">FeMoco</span> の模型で、いちばん低いエネルギー（基底状態）を<strong>化学的精度</strong>で見積もったとしています。</li>
+    <li>2026 年 11 月 17〜19 日のスパコンの国際会議 <span lang="en">SC26</span> では、ゴードン・ベル賞の部門に「<span lang="en">Closing the FeMo-Cofactor 'Quantum-Advantage' Gap with Exascale Supercomputers</span>」（<span lang="en">FeMoco</span> の「量子優位」の差を、エクサ級スパコンで埋める）という研究が並びました（<span lang="en">SC26</span> の表彰ページ）。</li>
+    <li>中国の国際放送 <span lang="en">CGTN</span> の日本語記事（<span lang="en">AFPBB</span> が 11 月 23 日に配信）は、この <span lang="en">FeMoco</span> の研究が中国科学技術大学などのチームによるもので、ゴードン・ベル賞を受けたと伝えています。使った計算機は、中国の 10 万枚級の計算カードを積んだ「曙光 8000（登峰）」だとしています。</li>
+  </ul>
+  <div class="key warn"><b>CAUTION</b>受賞と計算機の名前は、いまのところ中国側の報道で確かめた段階です。賞を出す <span lang="en">ACM</span> の受賞者一覧は 2023 年までしか載っておらず、2026 年の発表文はこの記事を書いた時点（2026 年 11 月 27 日）で読めていません。速さなどの数字は、<span lang="en">ACM</span> で確かめられるまで載せません。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span><span lang="en">FeMoco</span> という分子</h2>
+  <p>空気の約 8 割は窒素ですが、生き物はそのままでは使えません。窒素の分子は 2 つの原子が三重の結合でがっちりつながっていて、切るのが大変だからです。土の中の細菌などが持つ<strong>ニトロゲナーゼ</strong>という酵素は、これを常温でほどいてアンモニアにします。</p>
+  <p>その反応の中心にいるのが <span lang="en">FeMoco</span>（鉄モリブデン補因子）です。鉄 7 個、モリブデン 1 個、硫黄 9 個、炭素 1 個が、かごのように組み合わさっています。人間の工場は同じことを高温・高圧（ハーバー・ボッシュ法）でやっているので、酵素のしくみが分かれば省エネの手がかりになる、と長く期待されてきました。</p>
+  <div class="key"><b>KEY</b>鉄の原子がたくさんあると、電子の向き（スピン）の組み合わせが山ほどあり、どれがいちばん安定かを決めるのが難しい。ここが計算の難所です。</div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>なぜ量子の宿題だったか</h2>
+  <ul>
+    <li>2017 年、ライハー氏らは米国科学アカデミー紀要（<span lang="en">PNAS</span>）の論文で、<span lang="en">FeMoco</span> の模型（54 軌道、量子ビットにすると 108 個）を、誤りを直せる量子コンピュータで解くのにどれだけの操作が要るかを見積もりました。ここから <span lang="en">FeMoco</span> は「量子コンピュータが役に立つ例」の定番になりました。</li>
+    <li>ところが 2019 年には、この 54 軌道の模型は、古典の計算ならノートパソコンで数時間で扱えることが示されます（チャン氏のブログで紹介されたリー氏らの研究）。電子の対になっていない部分がなく、本物より易しい模型だったからです。</li>
+    <li>そこで、より本物に近い <strong>76 軌道（量子ビットにすると 152 個）</strong>の模型が新しい目標になりました。2026 年のチャン氏らの論文が扱ったのはこちらです。</li>
+  </ul>
+  <p>「量子の計算機でないと無理」と言われた問題が古典に追いつかれるのは、初めてではありません。2021 年のゴードン・ベル賞は、中国の神威スパコンで量子回路を古典でまねて、「量子超越」の差を埋めたという研究でした（<span lang="en">ACM</span> の受賞一覧）。</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>全部数えると宇宙が終わる</h2>
+  <div class="lab">
+    <b>触って確かめる ・ 軌道の数を増やしてみる</b>
+    <div class="row"><label for="nb">軌道の数</label><input type="range" id="nb" min="10" max="80" value="20"><output id="nb-o">20 軌道</output></div>
+    <div class="row" role="group" aria-label="よく使う値">
+      <button class="chip" data-v="54">2017 年の模型（54）</button>
+      <button class="chip" data-v="76">2026 年の模型（76）</button>
+    </div>
+    <canvas id="cv" width="560" height="380" aria-label="軌道の数と、数える量の桁数のグラフ"></canvas>
+    <div class="big" aria-live="polite">
+      <div><span>電子の入り方の数（全部数える）</span><b id="o-all">—</b><small>1 つの軌道に 4 通り（空・上向き・下向き・両方）</small></div>
+      <div><span>1 秒に 10<sup>18</sup> 通り数えると</span><b id="o-t">—</b><small id="o-ts">宇宙の年齢は約 138 億年</small></div>
+      <div><span>近似の手間（20 軌道を 1 とする）</span><b id="o-p">—</b><small>軌道の数の 6 乗で増える例</small></div>
+    </div>
+    <p class="note">青は「すべての入り方を数える」場合、緑は「手間が軌道の数の 6 乗で増える近似」の例です。桁の増え方の違いを見るための模型で、実際の計算の時間ではありません。電子の数が決まっていることなどを使うと全部数える量は減りますが、それでも指数で増えます。</p>
+  </div>
+  <p>76 軌道で全部数えると、入り方は 10 の 45 乗を超えます。1 秒に 10 の 18 乗回（エクサ級スパコンの速さの桁）数えても、宇宙の年齢の 100 億倍以上かかる計算です。<strong>まともに数えるのは古典にも量子にも無理</strong>で、勝負は「どこを数えずに済ませるか」です。</p>
+  <div class="key"><b>KEY</b>量子ビットは 152 個あれば、この 10 の 45 乗通りを重ね合わせで表せます。だから量子向きと言われてきました。一方、古典は「指数」を「多項式」に置き換える近似で近づきます。</div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>古典はどうやって近づいたか</h2>
+  <p>チャン氏らの論文とブログによると、やり方は大きく 3 段階です。</p>
+  <ol>
+    <li><strong>候補を絞る</strong>：鉄の軌道とスピンの組み合わせを列挙して、見込みの薄いものをふるい落とす。</li>
+    <li><strong>精度の高い近似で計算する</strong>：結合クラスター法（<span lang="en">CC</span>）と密度行列くりこみ群（<span lang="en">DMRG</span>）を、精度を段階的に上げながら使う。最後の最も重い計算は、残った 3 つの候補だけ。</li>
+    <li><strong>外挿する</strong>：精度を上げたときの値の動きから、「無限に精度を上げたらここ」という値を見積もる。</li>
+  </ol>
+  <p>結果、残った候補（スピンの並び方の違う形）は、化学的精度の範囲ではほぼ同じエネルギーだった、としています。</p>
+  <div class="key"><b>KEY</b>解いたのは「本物の <span lang="en">FeMoco</span> の化学」ではなく、「量子コンピュータの目標として使われてきた模型のエネルギー」です。この区別が大事です。</div>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>量子はもういらない？</h2>
+  <p>当のチャン氏は、そうは言っていません。ブログでの主な主張は次のとおりです。</p>
+  <ul>
+    <li><span lang="en">FeMoco</span> で量子が「指数的に」有利だという根拠は、もともと量子回路のまねの問題よりずっと弱かった。</li>
+    <li>全体のエネルギーを化学的精度で出すという目標は、かなり人工的。化学で効くのはエネルギーの差のほう。</li>
+    <li>古典の外挿の誤差の見積もりには、量子のアルゴリズムが持つような誤差の保証がない。</li>
+    <li>76 軌道の模型もまだ本物を切り詰めたもので、軌道を増やしたり、たんぱく質の揺れを入れたりすると数字は動く。</li>
+    <li>量子コンピュータへの期待は変わらない。ただ、<strong>完成を待たずに先に進む</strong>だけだ、と。</li>
+  </ul>
+  <p>同じ年のゴードン・ベル賞の最終候補には、クリーブランド・クリニック、理化学研究所、<span lang="en">IBM</span> による、量子コンピュータ（<span lang="en">IBM</span> の <span lang="en">Heron</span>）と「富岳」などのスパコンを組み合わせた、1 万 2635 原子のたんぱく質の計算も入りました（<span lang="en">IBM</span> の発表）。量子と古典は、取り合うより組み合わせる方向にも動いています。</p>
+  <div class="key"><b>KOBO LOOP の見方</b>「量子優位」は、ある日決まって終わる線ではなく、古典が追いかけるたびに奥へ動く線です。量子の出番を測るには、古典の最新の結果と並べて見る必要があります。</div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>用語集</h2>
+  <dl>
+    <dt>古典コンピュータ</dt><dd>量子コンピュータに対して、いまの普通の計算機（スパコンを含む）のこと。</dd>
+    <dt>量子ビット</dt><dd>0 と 1 を重ね合わせた状態を持てる、量子コンピュータの情報の単位。</dd>
+    <dt>軌道</dt><dd>分子の中で電子が入る「席」。1 つの軌道に、向きの違う電子が 2 個まで入れる。</dd>
+    <dt>化学的精度</dt><dd>エネルギーの誤差が 1 モルあたり約 1 キロカロリー以内であること。化学反応を予測するのに必要とされる目安。</dd>
+    <dt>量子優位</dt><dd>量子コンピュータが、古典では現実的な時間で解けない問題を解けること。</dd>
+    <dt>ゴードン・ベル賞</dt><dd><span lang="en">ACM</span> が毎年、スパコンを使った計算科学の優れた成果に贈る賞。</dd>
+  </dl>
+</section>
+
+<footer>
+  <span>事実の出どころ：<span lang="en">arXiv:2601.04621</span>（チャン氏ら、2026-01-08 投稿、2026-06-22 改訂）、チャン氏のブログ「<span lang="en">The FeMo-cofactor and classical and quantum computing</span>」（<span lang="en">Quantum Frontiers</span>、2026-03-12）、<span lang="en">SC26</span> の表彰ページ、<span lang="en">ACM</span> のゴードン・ベル賞のページ（2021 年の受賞）、<span lang="en">IBM</span> のブログ（2026-09-09）、<span lang="en">AFPBB</span>（<span lang="en">CGTN</span> 日本語、2026-11-23）。いずれも 2026-11-27 確認。4 章の模型の数字は、この記事での目安の計算です。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const L4 = Math.log10(4), YEAR = 3.156e7, EXA_YEAR = Math.log10(1e18 * YEAR), UNIV = 1.38e10;
+let n = 20, shown = 20, raf;
+const sup = e => { const m = Math.floor(e), f = 10 ** (e - m); return (f >= 9.95 ? '1.0' : f.toFixed(1)) + ' × 10<sup>' + (f >= 9.95 ? m + 1 : m) + '</sup>'; };
+function draw(x){
+  const c = $('cv'), g = c.getContext('2d'), W = c.width, H = c.height;
+  const L = 66, R = W - 16, T = 18, B = H - 52, X = v => L + (v - 10) / 70 * (R - L), Y = v => B - v / 50 * (B - T);
+  g.clearRect(0, 0, W, H); g.font = '19px sans-serif'; g.lineWidth = 1;
+  g.strokeStyle = css('--rule'); g.fillStyle = css('--soft'); g.textAlign = 'right';
+  for (let v = 0; v <= 50; v += 10) { g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(R, Y(v)); g.stroke(); g.fillText('10^' + v, L - 6, Y(v) + 5); }
+  g.textAlign = 'center';
+  for (let v = 10; v <= 80; v += 10) g.fillText(v, X(v), B + 24);
+  g.fillText('軌道の数', (L + R) / 2, B + 48);
+  // エクサ機が 1 年で数えられる量
+  g.setLineDash([6, 5]); g.strokeStyle = css('--ink'); g.globalAlpha = .55;
+  g.beginPath(); g.moveTo(L, Y(EXA_YEAR)); g.lineTo(R, Y(EXA_YEAR)); g.stroke(); g.globalAlpha = 1; g.setLineDash([]);
+  g.textAlign = 'left'; g.fillStyle = css('--soft'); g.fillText('エクサ級で 1 年かけて数えられる量', L + 6, Y(EXA_YEAR) - 7);
+  // 2 本の線
+  const line = (f, col) => { g.strokeStyle = col; g.lineWidth = 3; g.beginPath(); for (let v = 10; v <= x; v += .5) { const y = Y(f(v)); v === 10 ? g.moveTo(X(v), y) : g.lineTo(X(v), y); } g.stroke(); };
+  line(v => v * L4, css('--comp')); line(v => 6 * Math.log10(v), css('--giant'));
+  // いまの位置
+  g.fillStyle = css('--comp'); g.beginPath(); g.arc(X(x), Y(x * L4), 6, 0, 7); g.fill();
+  g.fillStyle = css('--giant'); g.beginPath(); g.arc(X(x), Y(6 * Math.log10(x)), 6, 0, 7); g.fill();
+  g.font = '600 19px sans-serif'; g.textAlign = x > 60 ? 'right' : 'left'; const dx = x > 60 ? -12 : 12;
+  g.fillStyle = css('--comp'); g.fillText('全部数える', X(x) + dx, Y(x * L4) + 5);
+  g.fillStyle = css('--giant'); g.fillText('近似の例', X(x) + dx, Y(6 * Math.log10(x)) + 24);
+}
+function update(){
+  const e = n * L4, sec = e - 18, yr = sec - Math.log10(YEAR);
+  $('nb-o').textContent = n + ' 軌道（量子ビット ' + 2 * n + ' 個）';
+  $('o-all').innerHTML = sup(e);
+  $('o-t').innerHTML = sec < Math.log10(60) ? '1 分未満' : sec < Math.log10(86400) ? '約 ' + Math.round(10 ** sec / 3600 * 10) / 10 + ' 時間' : yr < 0 ? '約 ' + Math.round(10 ** sec / 86400) + ' 日' : yr < 4 ? '約 ' + Math.round(10 ** yr).toLocaleString() + ' 年' : yr < Math.log10(UNIV) ? '約 ' + sup(yr) + ' 年' : sup(yr - Math.log10(UNIV)) + ' 倍';
+  $('o-ts').textContent = yr >= Math.log10(UNIV) ? '宇宙の年齢（約 138 億年）の何倍か' : '宇宙の年齢は約 138 億年';
+  const pr = (n / 20) ** 6; $('o-p').textContent = (pr >= 100 ? Math.round(pr).toLocaleString() : Math.round(pr * 10) / 10) + ' 倍';
+  document.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.v === n)));
+  cancelAnimationFrame(raf);
+  if (reduce) { shown = n; return draw(n); }
+  const from = shown, t0 = performance.now();
+  const step = t => { const k = Math.min(1, (t - t0) / 450), q = 1 - (1 - k) ** 3; shown = from + (n - from) * q; draw(shown); if (k < 1) raf = requestAnimationFrame(step); };
+  raf = requestAnimationFrame(step);
+}
+$('nb').addEventListener('input', e => { n = +e.target.value; update(); });
+document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => { $('nb').value = b.dataset.v; n = +b.dataset.v; update(); }));
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => draw(shown));
+update();
+</script>
+</body>
+</html>
