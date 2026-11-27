@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="水星探査機ベピコロンボが8年かけて水星の軌道に入りました。近いのに冥王星より行きにくい理由を、太陽へ落ちると速くなる模型で確かめます。">
+<meta property="og:title" content="近いのに遠い水星">
+<meta property="og:description" content="水星へ行くには冥王星より多くのエネルギーが要る（ESA）。太陽へ落ちると速くなるブレーキの物理と、最後の37分。">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>近いのに遠い水星</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+/* layout: 講義ノート。広い画面は左に目次、本文は 1 段。太陽・探査機の道 = 橙（--giant）、水星の軌道 = 青緑（--comp）。動きは Corporate：easing (0.2,0,0,1)、150/280/450ms */
+:root{
+  --paper:#f4f4f2; --sheet:#ffffff; --ink:#1f1a19; --soft:#58504c; --faint:#938a85; --rule:#ddd6d1;
+  --giant:#c2410c; --giant-bg:#fbeee6; --comp:#0f766e; --bad:#b3261e;
+  --f-display:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
+  --f-body:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#120e0d; --sheet:#1b1615; --ink:#efe9e6; --soft:#b9afaa; --faint:#776e69; --rule:#332b28;
+  --giant:#ff8a4c; --giant-bg:#2e1a10; --comp:#5eead4; --bad:#ff8a80; color-scheme:dark }
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.page{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.page{grid-template-columns:minmax(0,1fr);gap:8px}}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+@media (max-width:900px){nav.toc{position:static}}
+nav.toc b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--faint);display:block;margin-bottom:8px}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;counter-reset:c}
+nav.toc li{counter-increment:c}
+nav.toc a{color:var(--soft);text-decoration:none;display:flex;gap:8px}
+nav.toc a::before{content:counter(c);font-family:var(--f-data);color:var(--faint);min-width:1.4em}
+nav.toc a:hover{color:var(--ink)}
+main{min-width:0;display:flex;flex-direction:column;gap:22px;max-width:46em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 em{font-style:normal;color:var(--giant)}
+header p{color:var(--soft);margin:10px 0 0}
+.meta{font-family:var(--f-data);font-size:12px;color:var(--faint);margin-top:10px}
+section{display:flex;flex-direction:column;gap:14px;padding-top:26px;border-top:1px solid var(--rule)}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.35;margin:0;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font-family:var(--f-data);font-size:13px;color:var(--faint);font-weight:400}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:8px 0 0}
+p{margin:0}
+ul,ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+a{color:var(--comp)}
+code{font-family:var(--f-data);font-size:.9em}
+.eq{font-family:var(--f-data);font-size:.92em;padding-left:1em;overflow-x:auto;white-space:nowrap}
+.key{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--giant);padding:12px 16px;border-radius:2px}
+.key b{display:block;font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant);margin-bottom:2px}
+.warn{border-left-color:var(--bad)}.warn b{color:var(--bad)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6;background:var(--sheet)}
+th,td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--soft);font-size:13px;background:var(--paper)}
+td.n{text-align:right;font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab{background:var(--giant-bg);border:1px solid var(--rule);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab > b{font-family:var(--f-data);font-weight:400;font-size:12px;letter-spacing:.14em;color:var(--giant)}
+.lab .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.lab .note{font-size:13.5px;color:var(--soft)}
+.lab input[type=range]{accent-color:var(--giant);width:min(260px,100%)}
+.lab output{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.lab canvas{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+.chip{font:500 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-bottom-width:3px;border-radius:3px;padding:5px 12px;cursor:pointer}
+.chip:focus-visible,.lab input:focus-visible,nav.toc a:focus-visible{outline:2px solid var(--giant);outline-offset:2px}
+.readout{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.readout b{font-family:var(--f-data)}
+dl{margin:0;display:grid;grid-template-columns:minmax(8em,auto) minmax(0,1fr);gap:8px 18px;font-size:14.5px;line-height:1.7}
+@media (max-width:560px){dl{grid-template-columns:minmax(0,1fr);gap:2px 0}dd{margin-bottom:8px}}
+dt{font-weight:700}dd{margin:0;color:var(--soft)}
+footer{color:var(--faint);font-size:13px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+/* 日本語組版（jp-design）：禁則、約物詰め、和欧間、見出しの文節改行 */
+:root{--ease:cubic-bezier(.2,0,0,1);--t-quick:150ms;--t-std:280ms;--t-slow:450ms}
+main{line-break:strict;overflow-wrap:anywhere;font-feature-settings:"palt" 1;line-height:1.85}
+main code,main table,.eq,.lab output,.readout b{font-feature-settings:normal}
+@supports (text-autospace:normal){main{text-autospace:normal}}
+@supports (text-spacing-trim:normal){main{text-spacing-trim:normal}}
+@supports (word-break:auto-phrase){h1,h2,h3{word-break:auto-phrase}}
+em{font-style:normal}
+.chip{transition:border-color var(--t-quick) var(--ease),color var(--t-quick) var(--ease),transform var(--t-quick) var(--ease)}
+.chip:active{transform:translateY(1px)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+/* ui-review で直した点：押しやすさ（44px）、小さい文字のコントラスト */
+.chip{min-height:44px}
+.meta,nav.toc b{color:var(--soft)}
+.lab input[type=range]{min-height:32px}
+.lab canvas{max-width:560px}
+.meter{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.meter .track{position:relative;height:12px;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.meter .fill{height:100%;transition:width var(--t-quick) linear}
+.meter .lim{position:absolute;top:-2px;bottom:-2px;border-left:2px dashed var(--ink);opacity:.6}
+.meter b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-weight:600;min-width:6em;text-align:right}
+.status{font-weight:700}
+.status.bad{color:var(--bad)} .status.ok{color:var(--comp)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.big div{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.big span{font-size:13px;color:var(--soft)}
+.big b{font-family:var(--f-data);font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;line-height:1.3;font-feature-settings:normal}
+.big small{font-size:12.5px;color:var(--soft)}
+figure{margin:0;display:flex;flex-direction:column;gap:6px}
+figure svg{width:100%;max-width:520px;height:auto;margin:0 auto;display:block;background:var(--sheet);border:1px solid var(--rule);border-radius:3px}
+figcaption{font-size:13.5px;color:var(--soft)}
+</style>
+</head><body>
+<div class="page">
+<nav class="toc" aria-label="目次">
+  <b>CONTENTS</b>
+  <ol>
+    <li><a href="#s1">何が起きたか</a></li>
+    <li><a href="#s2">近いのに行きにくい</a></li>
+    <li><a href="#s3">太陽へ落ちると速くなる</a></li>
+    <li><a href="#s4">9 回のフライバイでブレーキ</a></li>
+    <li><a href="#s5">最後の 37 分</a></li>
+    <li><a href="#s6">これから</a></li>
+    <li><a href="#s7">用語集</a></li>
+  </ol>
+</nav>
+
+<main>
+<header>
+  <h1>近いのに<em>遠い</em>水星</h1>
+  <p>日本とヨーロッパの水星探査機ベピコロンボが、打ち上げから 8 年かけて、2026 年 11 月 21 日に水星を回る軌道に入りました。水星は太陽系でいちばん内側の惑星で、地球からは冥王星よりずっと近くにあります。それなのに、なぜこんなに時間がかかるのでしょうか。ブレーキの物理を、動かして確かめます。</p>
+  <div class="meta">2026-11-24 版 ・ 読む時間の目安 10 分 ・ 途中の「触って確かめる」は動かせます</div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">1</span>何が起きたか</h2>
+  <ul>
+    <li>欧州宇宙機関（<span lang="en">ESA</span>）と宇宙航空研究開発機構（<span lang="en">JAXA</span>）のベピコロンボは、2018 年 10 月 20 日に打ち上げられました。ESA の水星表面探査機 <span lang="en">MPO</span> と、JAXA の水星磁気圏探査機「みお」が重なった形で飛んできました。</li>
+    <li>2026 年 11 月 21 日 18 時 24 分（世界時、日本時間では 22 日 3 時 24 分）、水星の表面から 635 km の所で、<span lang="en">MPO</span> のスラスタ 4 基が減速の噴射を始めました。予定は 37 分間です。</li>
+    <li>途中で探査機が安全のための待機状態（セーフモード）に入り、噴射は予定の速度変化の<strong>約 77 %</strong> で止まりました。それでも水星の軌道に入れたことを ESA が確認しています。</li>
+  </ul>
+  <div class="key"><b>KEY</b>ESA によると、水星の周りの安定した軌道に入れるには、<strong>冥王星へ探査機を送るより多くのエネルギーが要ります</strong>。理由は太陽の重力です。</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span>近いのに行きにくい</h2>
+  <p>地球は太陽の周りを秒速約 30 km で回っています。地球から打ち上げた探査機も、最初はこの速さを持っています。</p>
+  <p>太陽に近づくには、この速さを<strong>落とす</strong>必要があります。速さが足りなくなった探査機は、太陽の方へ落ちていきます。ところが、太陽へ落ちていくと、坂を転がるボールのように<strong>どんどん速くなります</strong>。水星の所に着いたときには、水星より速すぎて、そのままでは通り過ぎてしまいます。</p>
+  <p>つまり水星へ行くには、出発で減速し、着いてからもう一度、大きく減速しなければなりません。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span>太陽へ落ちると速くなる</h2>
+  <div class="lab">
+    <b>触って確かめる ・ 地球の軌道で減速してみる</b>
+    <div class="row"><label for="dv">地球の軌道で落とす速さ</label><input type="range" id="dv" min="0" max="1200" value="0"><output id="dv-o">秒速 0.0 km</output></div>
+    <div class="row" role="group" aria-label="よく使う値">
+      <button class="chip" data-v="300">秒速 3 km</button>
+      <button class="chip" data-v="753">水星にちょうど届く</button>
+      <button class="chip" data-v="1100">秒速 11 km</button>
+    </div>
+    <canvas id="orb" width="520" height="420" aria-label="太陽の周りの地球と水星の軌道と、探査機の通り道"></canvas>
+    <div class="big" aria-live="polite">
+      <div><span>いちばん太陽に近づく所</span><b id="o-rp">—</b><small>地球の軌道 = 1、水星の軌道 = 0.39</small></div>
+      <div><span>水星の軌道での速さ</span><b id="o-v">—</b><small>水星は秒速約 47.9 km</small></div>
+      <div><span>水星との速さの差</span><b id="o-d">—</b><small>着いてから落とさないといけない分</small></div>
+    </div>
+    <p class="note">地球と水星の軌道を、同じ平面にある円として計算した教科書どおりの模型です（ホーマン軌道の考え方）。惑星そのものの重力や、ベピコロンボが実際に通った道は入れていません。</p>
+  </div>
+  <p>地球の軌道で秒速約 7.5 km 落とすと、探査機の道はちょうど水星の軌道まで届きます。ところが着いたときの速さは秒速約 57.5 km で、水星より<strong>秒速約 9.6 km も速い</strong>計算です。出発で落とした以上に、着いてから落とさなければなりません。</p>
+  <div class="key"><b>KEY</b>この模型だけでも、太陽の周りで変える速さは合わせて秒速 17 km ほど（目安の計算）。これを全部ロケットの燃料でまかなうのは大変です。</div>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span>9 回のフライバイでブレーキ</h2>
+  <p>ベピコロンボは、燃料の代わりに<strong>惑星の重力</strong>をブレーキに使いました。惑星のそばを通り過ぎる（フライバイ）と、惑星の重力で向きと速さが変わります。うまく通る位置を選べば、探査機を遅くできます。あわせて、太陽電池の電気で少しずつ押す電気推進も使いました。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>回</th><th>相手</th><th>日付</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>地球</td><td class="n">2020-04-10</td></tr>
+      <tr><td class="n">2</td><td>金星</td><td class="n">2020-10-15</td></tr>
+      <tr><td class="n">3</td><td>金星</td><td class="n">2021-08-11</td></tr>
+      <tr><td class="n">4</td><td>水星</td><td class="n">2021-10-01</td></tr>
+      <tr><td class="n">5</td><td>水星</td><td class="n">2022-06-23</td></tr>
+      <tr><td class="n">6</td><td>水星</td><td class="n">2023-06-19</td></tr>
+      <tr><td class="n">7</td><td>水星</td><td class="n">2024-09-04</td></tr>
+      <tr><td class="n">8</td><td>水星</td><td class="n">2024-12-01</td></tr>
+      <tr><td class="n">9</td><td>水星</td><td class="n">2025-01-08</td></tr>
+    </tbody>
+  </table></div>
+  <p>水星そのものの横を 6 回も通って、少しずつ速さを合わせてから、最後の減速に臨みました。8 年かかったのは、燃料を節約してブレーキをかけ続けた時間です。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span>最後の 37 分</h2>
+  <ul>
+    <li><strong>止まった噴射</strong>：噴射の途中でセーフモードに入り、予定の約 77 % で止まりました。ESA と製造した <span lang="en">Airbus</span> の調べでは、姿勢の制御とスラスタの制御に関わるソフトウェアの問題でした。</li>
+    <li><strong>それでも捕まった</strong>：探査機は水星の重力に「弱く」捕まった状態（弱安定捕獲）に入っていて、ESA の担当者は「水星の軌道に捕まったことを確認した」と発表しました。この方法を月以外で使ったのは初めてだと ESA は説明しています。</li>
+    <li><strong>軌道は少し大きく</strong>：1 周にかかる時間は、予定の 58 時間ではなく 75 時間になりました。残りの手順を組み直したので、追加の噴射は要らず、このあとの予定にも影響はないとしています。</li>
+  </ul>
+  <div class="key warn"><b>NOTE</b>弱く捕まっただけでは、何周かすると水星から離れてしまいます。だからこそ、この減速の噴射が欠かせなかったと ESA は説明しています。</div>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span>これから</h2>
+  <ul>
+    <li><strong>2026 年 12 月 9〜10 日</strong>：<span lang="en">MPO</span> と「みお」が分かれます。</li>
+    <li><strong>2027 年 3 月まで</strong>：<span lang="en">MPO</span> が何度か噴射して、観測用の軌道に移ります。</li>
+    <li><strong>2027 年 4 月</strong>：2 機の科学観測が始まります。<span lang="en">MPO</span> は水星の表面と内部を、「みお」は水星をとりまく磁場（磁気圏）を調べます。</li>
+  </ul>
+  <p>水星は、太陽の周りを 88 日で 1 周し、2 周する間に 3 回自転します。表面の温度は 450 ℃ まで上がります（ESA）。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span>用語集</h2>
+  <dl>
+    <dt>フライバイ</dt><dd>惑星のそばを通り過ぎて、その重力で探査機の向きや速さを変えること。スイングバイとも言う。</dd>
+    <dt>軌道投入</dt><dd>目的の天体の周りを回る軌道に入るための減速の噴射。</dd>
+    <dt>セーフモード</dt><dd>異常を感じた探査機が、自分を守るために動きを止めて地上からの指示を待つ状態。</dd>
+    <dt>ホーマン軌道</dt><dd>2 つの円軌道のあいだを、楕円の半分を通って移る、教科書でいちばん基本の移り方。</dd>
+  </dl>
+</section>
+
+<footer>
+  <span>事実の出どころ：ESA「<span lang="en">BepiColombo safely in Mercury orbit despite unexpected challenge</span>」（2026-11-23 公開）、「<span lang="en">BepiColombo factsheet</span>」、「<span lang="en">Latest updates: BepiColombo's arrival at Mercury</span>」（いずれも 2026-11-24 確認）。3 章の模型と「秒速約 7.5 km」「秒速約 9.6 km」「合わせて秒速 17 km ほど」は、円軌道を仮定した教科書の式による目安の計算で、ESA の値ではありません。</span>
+  <span>このページは AI（Claude）が一次情報をもとに書き、人が確認して公開しています。誤りに気づいたら教えてください。</span>
+</footer>
+</main>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const VE = 29.78, RM = 0.387, VM = VE / Math.sqrt(RM);
+let dv = 0, shown = 0, raf;
+function orbit(d){
+  const v = VE - d; if (v <= 0.01) return {a: 0.5, rp: 0, v};
+  const a = 1 / (2 - (v / VE) ** 2), rp = Math.max(0, 2 * a - 1);
+  return {a, rp, v};
+}
+function atMercury(o){
+  if (o.rp > RM + 0.002) return null;
+  const vr = VE * Math.sqrt(2 / RM - 1 / o.a), vt = o.v * 1 / RM, rad = Math.sqrt(Math.max(0, vr * vr - vt * vt));
+  return {speed: vr, diff: Math.hypot(vt - VM, rad)};
+}
+function draw(frac){
+  const c = $('orb'), g = c.getContext('2d'), W = c.width, H = c.height, cx = W / 2, cy = H / 2, S = Math.min(W, H) / 2 - 24;
+  g.clearRect(0, 0, W, H); g.lineWidth = 2;
+  g.strokeStyle = css('--rule'); g.beginPath(); g.arc(cx, cy, S, 0, 7); g.stroke();
+  g.strokeStyle = css('--comp'); g.beginPath(); g.arc(cx, cy, S * RM, 0, 7); g.stroke();
+  g.fillStyle = css('--giant'); g.beginPath(); g.arc(cx, cy, 9, 0, 7); g.fill();
+  g.fillStyle = css('--ink'); g.beginPath(); g.arc(cx + S, cy, 7, 0, 7); g.fill();
+  g.font = '18px sans-serif'; g.fillStyle = css('--soft'); g.textAlign = 'center';
+  g.fillText('太陽', cx, cy - 16); g.textAlign = 'right'; g.fillText('地球', cx + S - 12, cy - 12);
+  g.fillStyle = css('--comp'); g.textAlign = 'center'; g.fillText('水星の軌道', cx, cy + S * RM + 22);
+  // 探査機の道（地球の位置＝遠日点から、半周だけ描く）
+  const o = orbit(dv), e = (1 - o.rp) / (1 + o.rp), A = o.a;
+  g.strokeStyle = css('--giant'); g.lineWidth = 3; g.setLineDash([]); g.beginPath();
+  const N = 120, end = Math.round(N * frac);
+  for (let i = 0; i <= end; i++) {
+    const th = Math.PI * i / N; // 遠日点から近日点まで
+    const r = o.rp === 0 ? 1 - i / N : A * (1 - e * e) / (1 - e * Math.cos(th));
+    const x = cx + S * r * Math.cos(-th), y = cy + S * r * Math.sin(-th);
+    i ? g.lineTo(x, y) : g.moveTo(x, y);
+  }
+  g.stroke();
+}
+function update(){
+  const o = orbit(dv), m = atMercury(o);
+  $('dv-o').textContent = '秒速 ' + dv.toFixed(1) + ' km';
+  $('o-rp').textContent = o.rp <= 0.005 ? '太陽に落ちる' : o.rp.toFixed(2);
+  $('o-v').textContent = m ? '秒速 ' + m.speed.toFixed(1) + ' km' : '届かない';
+  $('o-d').textContent = m ? '秒速 ' + m.diff.toFixed(1) + ' km' : '—';
+  document.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(Math.abs(+b.dataset.v / 100 - dv) < 0.05)));
+  cancelAnimationFrame(raf);
+  if (reduce) return draw(1);
+  let f = 0; const step = () => { f = Math.min(1, f + 0.05); draw(f); if (f < 1) raf = requestAnimationFrame(step); }; step();
+}
+$('dv').addEventListener('input', e => { dv = e.target.value / 100; update(); });
+document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => { $('dv').value = b.dataset.v; dv = b.dataset.v / 100; update(); }));
+update();
+</script>
+</body></html>
